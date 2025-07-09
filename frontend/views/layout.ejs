@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <h1 class="nav-title">EcoVisor Acuático</h1>
+                <ul class="nav-menu">
+                    <li><a href="/" class="<%= pageTitle === 'Inicio' ? 'active' : '' %>">Inicio</a></li>
+                    <li><a href="#privacidad" class="<%= pageTitle === 'Inicio' ? '' : 'hidden' %>">Privacidad</a></li>
+                    <% if (user) { %>
+                        <li><a href="/mapa" class="<%= pageTitle === 'Mapa' ? 'active' : 'btn-mapa' %>">Ver Mapa</a></li>
+                        <li class="nav-user">Hola, <%= user.username %></li>
+                        <li><a href="/logout">Salir</a></li>
+                    <% } else { %>
+                        <li><a href="/login" class="<%= pageTitle === 'Login' ? 'active' : '' %>">Login</a></li>
+                        <li><a href="/register" class="<%= pageTitle === 'Registro' ? 'active' : '' %>">Registro</a></li>
+                    <% } %>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <%- include(pageView) %>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Sistema de Monitoreo de Ecosistemas Acuáticos. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="/js/main.js"></script>
+</body>
+</html>

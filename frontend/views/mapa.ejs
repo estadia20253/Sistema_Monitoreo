@@ -1,0 +1,29 @@
+<section class="map-section">
+    <div class="container-fluid">
+        <h2>Mapa de Ecosistemas Acuáticos - Hidalgo</h2>
+        
+        <% if (locals.backendConnected === false) { %>
+            <div class="alert alert-warning">
+                <p>⚠️ No se pudo conectar con el backend. Algunos datos pueden no estar disponibles.</p>
+            </div>
+        <% } %>
+        
+        <div class="mapa-contenedor">
+            <div class="map-container" id="map-container">
+                <div class="map-wrapper">
+                    <img id="mapa-imagen" src="" alt="Mapa del ecosistema" class="map-image" style="display: none;">
+                    <div id="pines-container" class="pines-container"></div>
+                </div>
+                <div class="loading" id="loading">Cargando mapa...</div>
+            </div>
+            
+            <div class="detalles-container" id="detalles-container">
+                <div id="detalles-content" class="detalles-content">
+                    <!-- Los detalles se cargarán aquí dinámicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script src="/js/mapa.js"></script>

@@ -1,0 +1,82 @@
+<main class="auth-container">
+    <h2>📝 Crear Cuenta</h2>
+    <% if (typeof error !== 'undefined') { %>
+        <p class="error">❌ <%= error %></p>
+    <% } %>
+    <form method="POST" action="/register" class="auth-form extended-form">
+        <div class="form-section">
+            <h3>� Información de Acceso</h3>
+            <label>📧 Email:
+                <input type="email" name="email" required placeholder="tu.email@ejemplo.com"
+                       title="Ingresa un email válido">
+            </label>
+            <label>� Contraseña:
+                <input type="password" name="password" required placeholder="Mínimo 6 caracteres" 
+                       minlength="6" title="La contraseña debe tener al menos 6 caracteres">
+            </label>
+        </div>
+
+        <div class="form-section">
+            <h3>👨‍💼 Información Personal</h3>
+            <label>📝 Nombres:
+                <input type="text" name="nombres" required placeholder="Ej: Juan Carlos" 
+                       maxlength="100" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+"
+                       title="Solo se permiten letras y espacios">
+            </label>
+            <div class="form-row">
+                <label>� Apellido Paterno:
+                    <input type="text" name="apellidoPaterno" required placeholder="Ej: González" 
+                           maxlength="50" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+"
+                           title="Solo se permiten letras y espacios">
+                </label>
+                <label>� Apellido Materno:
+                    <input type="text" name="apellidoMaterno" required placeholder="Ej: López" 
+                           maxlength="50" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+"
+                           title="Solo se permiten letras y espacios">
+                </label>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>� Seguridad - Recuperación de Contraseña</h3>
+            <label>❓ Pregunta Secreta:
+                <select name="preguntaSecreta" required>
+                    <option value="">Selecciona una pregunta secreta</option>
+                    <option value="¿Cuál es el nombre de tu primera mascota?">🐕 ¿Cuál es el nombre de tu primera mascota?</option>
+                    <option value="¿En qué ciudad naciste?">🏙️ ¿En qué ciudad naciste?</option>
+                    <option value="¿Cuál es el nombre de tu mejor amigo de la infancia?">� ¿Cuál es el nombre de tu mejor amigo de la infancia?</option>
+                    <option value="¿Cuál es tu color favorito?">🎨 ¿Cuál es tu color favorito?</option>
+                    <option value="¿Cómo se llama tu madre?">👩 ¿Cómo se llama tu madre?</option>
+                    <option value="¿Cuál es el nombre de tu escuela primaria?">🏫 ¿Cuál es el nombre de tu escuela primaria?</option>
+                    <option value="¿Cuál es tu comida favorita?">🍕 ¿Cuál es tu comida favorita?</option>
+                    <option value="¿Cuál es el nombre de tu primer trabajo?">💼 ¿Cuál es el nombre de tu primer trabajo?</option>
+                    <option value="¿En qué año te graduaste de la preparatoria?">🎓 ¿En qué año te graduaste de la preparatoria?</option>
+                    <option value="¿Cuál es tu película favorita?">🎬 ¿Cuál es tu película favorita?</option>
+                </select>
+            </label>
+            <label>� Respuesta Secreta:
+                <input type="text" name="respuestaSecreta" required placeholder="Tu respuesta a la pregunta secreta" 
+                       maxlength="100" title="Esta respuesta te ayudará a recuperar tu contraseña">
+            </label>
+            <div class="info-note">
+                <p><strong>📌 Importante:</strong> Recuerda tu pregunta y respuesta secreta. Te permitirán recuperar tu contraseña si la olvidas.</p>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="terms-section">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="acceptTerms" required>
+                    <span class="checkmark"></span>
+                    Acepto los <a href="#privacidad" target="_blank">términos de uso y políticas de privacidad</a>
+                </label>
+            </div>
+        </div>
+
+        <button type="submit">✨ Crear Cuenta</button>
+        
+        <div class="auth-nav-link">
+            ¿Ya tienes cuenta? <a href="/login">Inicia sesión aquí</a>
+        </div>
+    </form>
+</main>

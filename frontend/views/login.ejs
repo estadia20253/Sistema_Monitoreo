@@ -1,0 +1,26 @@
+<main class="auth-container">
+    <h2>🔐 Iniciar Sesión</h2>
+    <% if (typeof error !== 'undefined') { %>
+        <p class="error">❌ <%= error %></p>
+    <% } %>
+    <% if (typeof success !== 'undefined') { %>
+        <p class="success">✅ <%= success %></p>
+    <% } %>
+    <form method="POST" action="/login" class="auth-form">
+        <label>� Email:
+            <input type="email" name="email" required placeholder="tu.email@ejemplo.com">
+        </label>
+        <label>🔒 Contraseña:
+            <input type="password" name="password" required placeholder="Ingresa tu contraseña">
+        </label>
+        <button type="submit">🚀 Entrar</button>
+        
+        <div class="auth-nav-link">
+            ¿No tienes cuenta? <a href="/register">Regístrate aquí</a>
+        </div>
+        
+        <div class="auth-nav-link">
+            ¿Olvidaste tu contraseña? <a href="/forgot-password">Recupérala aquí</a>
+        </div>
+    </form>
+</main>
