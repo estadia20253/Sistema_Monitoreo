@@ -6,11 +6,18 @@ const pool = new Pool({
     port: process.env.DB_PORT || 5432,
     database: process.env.DB_NAME || 'ecomonitor_db',
     user: process.env.DB_USER || 'postgres',
-    password: process.env.DB_PASSWORD || 'alan010605',
+    password: process.env.DB_PASSWORD, // Requerido desde .env
     max: 20, // Máximo número de conexiones en el pool
     idleTimeoutMillis: 30000, // Tiempo de espera antes de cerrar conexiones inactivas
     connectionTimeoutMillis: 2000, // Tiempo de espera para nuevas conexiones
 });
+
+// Validar que las variables críticas estén configuradas
+if (!process.env.DB_PASSWORD) {
+    console.error('❌ ERROR CRÍTICO: DB_PASSWORD no está configurado en .env');
+    console.error('💡 Solución: Asegúrate de que el archivo .env existe y tiene DB_PASSWORD configurado');
+    process.exit(1);
+}
 
 // Función para probar la conexión
 async function testConnection() {

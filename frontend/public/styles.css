@@ -330,7 +330,8 @@ body {
 
 .mapa-contenedor {
     display: flex;
-    height: 85vh;
+    height: 80vh; /* Reducido de 85vh a 80vh */
+    min-height: 600px; /* Altura mínima garantizada */
     gap: 0;
     position: relative;
     overflow: hidden;
@@ -346,8 +347,8 @@ body {
     background: #f8f9fa;
     padding: 1rem;
     text-align: center;
-    min-height: 500px;
-    overflow: visible;
+    min-height: 600px;
+    overflow: hidden; /* Cambiado de visible a hidden */
     display: flex;
     justify-content: center; /* Centra horizontalmente el contenido */
     align-items: center;     /* Centra verticalmente el contenido */
@@ -362,20 +363,23 @@ body {
 /* Wrapper para que el mapa y los pines se muevan juntos */
 .map-wrapper {
     position: relative;
-    display: inline-block;
-    max-width: 100%;
-    max-height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    max-width: 900px; /* Tamaño máximo del contenedor */
+    max-height: 650px; /* Tamaño máximo del contenedor */
 }
 
 /* Centrar la imagen del mapa */
 .map-image {
     display: block;
-    margin-left: auto;
-    margin-right: auto;
-    max-width: 95%;
-    max-height: 95%;
-    width: auto;
+    width: 100%;
     height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain; /* Mantiene proporciones sin cortar */
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     position: relative;
@@ -401,6 +405,51 @@ body {
     transform: translate(-50%, -50%);
     z-index: 100;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Estilos para los iconos de los pines */
+.pin-icon {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    backdrop-filter: blur(5px);
+}
+
+/* Estilos específicos por tipo de pin */
+.pin-icon.rio {
+    border-color: #3498db;
+    color: #3498db;
+}
+
+.pin-icon.lago {
+    border-color: #2ecc71;
+    color: #2ecc71;
+}
+
+.pin-icon.presa {
+    border-color: #e74c3c;
+    color: #e74c3c;
+}
+
+/* Efecto hover para los pines */
+.pin:hover .pin-icon {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Pin activo (seleccionado) */
+.pin.activo .pin-icon {
+    transform: scale(1.15);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    border-width: 3px;
 }
 
 /* Panel de detalles */
@@ -655,6 +704,45 @@ body {
     border-top-color: rgba(44, 62, 80, 0.9);
 }
 
+/* Estilos para pin-tooltip (tooltips de pines del mapa) */
+.pin-tooltip {
+    position: absolute;
+    bottom: 110%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(44, 62, 80, 0.95);
+    color: white;
+    padding: 0.5rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    z-index: 200;
+    pointer-events: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.pin-tooltip.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.pin-tooltip.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Flecha del tooltip */
+.pin-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: rgba(44, 62, 80, 0.95);
+}
+
 /* Animaciones para el mapa y pines */
 @keyframes slideIn {
     from {
@@ -694,16 +782,26 @@ body {
     .mapa-contenedor {
         flex-direction: column;
         height: auto;
+        min-height: 70vh; /* Altura mínima en móviles */
     }
     
     .map-container {
-        min-height: 60vh;
-        padding: 1rem;
+        min-height: 70vh; /* Aumentado para mostrar mapa completo */
+        padding: 0.5rem;
     }
     
     .map-wrapper {
         max-width: 100%;
         max-height: 100%;
+        width: 100%;
+        height: 100%;
+    }
+    
+    .map-image {
+        width: 100%;
+        height: auto;
+        max-width: none;
+        max-height: none;
     }
     
     .detalles-container.detalles-visible {

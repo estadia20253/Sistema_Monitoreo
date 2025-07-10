@@ -63,12 +63,12 @@ def home():
 def obtener_mapa():
     try:
         # Servir la imagen PNG del mapa
-        ruta_imagen = os.path.join(os.path.dirname(__file__), 'static', 'mapa_hidalgo_base.png')
+        ruta_imagen = os.path.join(os.path.dirname(__file__), 'static', 'Mapa.webp')
         print(f"Buscando imagen en: {ruta_imagen}")
         
         if os.path.exists(ruta_imagen):
             print("Enviando imagen...")
-            return send_file(ruta_imagen, mimetype='image/png')
+            return send_file(ruta_imagen, mimetype='image/webp')
         else:
             print("Imagen no encontrada")
             return jsonify({"error": "Imagen del mapa no encontrada"}), 404
@@ -90,21 +90,32 @@ def obtener_pines():
         return jsonify({"error": str(e)}), 500
 
 
-# Ruta para agregar un nuevo pin
+# Ruta para agregar un nuevo pin o actualizar todos los pines
 @app.route('/api/pines', methods=['POST'])
-def agregar_pin():
+def manejar_pines():
     try:
-        nuevo_pin = request.json or {}
-        with open(PINES_FILE, 'r') as f:
-            pines = json.load(f)
-        nuevo_id = max([p.get('id', 0) for p in pines], default=0) + 1
-        nuevo_pin['id'] = nuevo_id
-        pines.append(nuevo_pin)
-        with open(PINES_FILE, 'w') as f:
-            json.dump(pines, f, indent=2)
-        return jsonify(nuevo_pin), 201
+        datos = request.json or {}
+        
+        # Si recibimos una lista, actualizamos todos los pines
+        if isinstance(datos, list):
+            print(f"Actualizando {len(datos)} pines...")
+            with open(PINES_FILE, 'w') as f:
+                json.dump(datos, f, indent=2, ensure_ascii=False)
+            return jsonify({"mensaje": f"Se actualizaron {len(datos)} pines exitosamente"}), 200
+        
+        # Si recibimos un objeto, agregamos un nuevo pin
+        else:
+            with open(PINES_FILE, 'r') as f:
+                pines = json.load(f)
+            nuevo_id = max([p.get('id', 0) for p in pines], default=0) + 1
+            datos['id'] = nuevo_id
+            pines.append(datos)
+            with open(PINES_FILE, 'w') as f:
+                json.dump(pines, f, indent=2, ensure_ascii=False)
+            return jsonify(datos), 201
+            
     except Exception as e:
-        print(f"Error al agregar pin: {str(e)}")
+        print(f"Error al manejar pines: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 

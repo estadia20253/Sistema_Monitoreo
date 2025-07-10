@@ -1,6 +1,11 @@
 <section class="map-section">
     <div class="container-fluid">
-        <h2>Mapa de Ecosistemas Acuáticos - Hidalgo</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h2>Mapa de Ecosistemas Acuáticos - Hidalgo</h2>
+            <button id="btn-editar-pines" onclick="toggleModoEdicion(); if (modoEdicion) mostrarListaPines();" style="background: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">
+                Editar Posiciones
+            </button>
+        </div>
         
         <% if (locals.backendConnected === false) { %>
             <div class="alert alert-warning">
