@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de Edición de Pines</title>
+    <style>
+        body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+        .test-info { background: #f0f8ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .debug-panel { position: fixed; top: 10px; left: 10px; background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 8px; z-index: 9999; max-width: 300px; }
+        #debug-coords { font-family: monospace; }
+    </style>
+</head>
+<body>
+    <div class="test-info">
+        <h3>🧪 Test de Edición de Pines</h3>
+        <p>1. Abre la consola del navegador (F12)</p>
+        <p>2. Ve a la página del mapa: <a href="http://localhost:3000/mapa" target="_blank">http://localhost:3000/mapa</a></p>
+        <p>3. Haz clic en "Editar Posiciones"</p>
+        <p>4. Revisa la consola para ver los logs de debugging</p>
+    </div>
+
+    <div class="debug-panel">
+        <h4>Debug Panel</h4>
+        <div>Estado del Backend:</div>
+        <div id="backend-status">Verificando...</div>
+        <div>Estado del Frontend:</div>
+        <div id="frontend-status">Verificando...</div>
+    </div>
+
+    <script>
+        // Verificar estado del backend
+        fetch('http://localhost:5000/api/pines')
+            .then(response => response.ok ? 'OK' : 'Error')
+            .then(status => {
+                document.getElementById('backend-status').textContent = status;
+                document.getElementById('backend-status').style.color = status === 'OK' ? '#4CAF50' : '#f44336';
+            })
+            .catch(() => {
+                document.getElementById('backend-status').textContent = 'Error - No disponible';
+                document.getElementById('backend-status').style.color = '#f44336';
+            });
+
+        // Verificar estado del frontend
+        fetch('http://localhost:3000/')
+            .then(response => response.ok ? 'OK' : 'Error')
+            .then(status => {
+                document.getElementById('frontend-status').textContent = status;
+                document.getElementById('frontend-status').style.color = status === 'OK' ? '#4CAF50' : '#f44336';
+            })
+            .catch(() => {
+                document.getElementById('frontend-status').textContent = 'Error - No disponible';
+                document.getElementById('frontend-status').style.color = '#f44336';
+            });
+
+        console.log('🧪 Test de edición de pines cargado');
+        console.log('📍 Para probar:');
+        console.log('1. Ve a http://localhost:3000/mapa');
+        console.log('2. Haz clic en "Editar Posiciones"');
+        console.log('3. Selecciona un pin de la lista');
+        console.log('4. Haz clic en el mapa para reposicionarlo');
+    </script>
+</body>
+</html>

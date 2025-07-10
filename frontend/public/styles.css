@@ -720,6 +720,9 @@ body {
     z-index: 200;
     pointer-events: none;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    /* Oculto por defecto */
+    opacity: 0;
+    visibility: hidden;
 }
 
 .pin-tooltip.hidden {
@@ -1368,5 +1371,108 @@ body {
     .form-section {
         margin-bottom: 2rem;
         padding-bottom: 1rem;
+    }
+}
+
+/* Estilos para los filtros de ecosistemas */
+#filtros-ecosistemas {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 8px 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+#filtros-ecosistemas label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+    font-size: 0.9rem;
+    user-select: none;
+}
+
+#filtros-ecosistemas label:hover {
+    background: rgba(52, 152, 219, 0.1);
+}
+
+#filtros-ecosistemas input[type="checkbox"] {
+    margin: 0;
+    transform: scale(1.1);
+}
+
+#filtros-ecosistemas span {
+    font-weight: 500;
+}
+
+/* Contador de pines */
+#contador-pines {
+    font-weight: 500;
+    border: 1px solid rgba(52, 152, 219, 0.3);
+}
+
+/* Responsive para filtros */
+@media (max-width: 768px) {
+    #filtros-ecosistemas {
+        flex-direction: column;
+        gap: 8px;
+        padding: 10px;
+    }
+    
+    #filtros-ecosistemas label {
+        font-size: 0.85rem;
+    }
+}
+
+/* Estilos para el botón de agregar pin */
+#boton-agregar-pin {
+    font-weight: 600;
+    border: 2px solid transparent;
+}
+
+#boton-agregar-pin:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Estilos para el formulario de agregar pin */
+#formulario-agregar-pin input:focus,
+#formulario-agregar-pin select:focus,
+#formulario-agregar-pin textarea:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+#formulario-agregar-pin button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+#formulario-agregar-pin .btn-submit:hover {
+    background: #229954 !important;
+}
+
+#formulario-agregar-pin .btn-cancel:hover {
+    background: #7f8c8d !important;
+}
+
+/* Animación para el modal */
+#formulario-agregar-pin {
+    animation: fadeInModal 0.3s ease;
+}
+
+@keyframes fadeInModal {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
     }
 }

@@ -2,9 +2,26 @@
     <div class="container-fluid">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
             <h2>Mapa de Ecosistemas Acuáticos - Hidalgo</h2>
-            <button id="btn-editar-pines" onclick="toggleModoEdicion(); if (modoEdicion) mostrarListaPines();" style="background: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">
-                Editar Posiciones
-            </button>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div id="filtros-ecosistemas" style="display: flex; gap: 10px; align-items: center;">
+                    <span style="font-weight: bold; color: #2c3e50;">Filtros:</span>
+                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                        <input type="checkbox" id="filtro-rio" checked onchange="aplicarFiltros()">
+                        <span style="color: #3498db;">🌊 Ríos</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                        <input type="checkbox" id="filtro-lago" checked onchange="aplicarFiltros()">
+                        <span style="color: #2ecc71;">🏞️ Lagos</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                        <input type="checkbox" id="filtro-presa" checked onchange="aplicarFiltros()">
+                        <span style="color: #e74c3c;">🏗️ Presas</span>
+                    </label>
+                </div>
+                <button id="btn-editar-pines" onclick="toggleModoEdicion(); if (modoEdicion) mostrarListaPines();" style="background: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">
+                    Editar Posiciones
+                </button>
+            </div>
         </div>
         
         <% if (locals.backendConnected === false) { %>
