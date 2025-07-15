@@ -12,6 +12,7 @@ const bcrypt = require('bcryptjs');
 const { testConnection } = require('./config/database');
 const { initializeDatabase } = require('./config/init-db');
 const User = require('./models/User');
+const Pin = require('./models/Pin');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -32,6 +33,13 @@ app.use(session({
 
 app.use((req, res, next) => {
     res.locals.user = req.session.user;
+    
+    // Log de todas las peticiones POST para debug
+    if (req.method === 'POST') {
+        console.log(`🔍 POST ${req.path} - Content-Type: ${req.headers['content-type']}`);
+        console.log(`🔍 Body size: ${JSON.stringify(req.body).length} chars`);
+    }
+    
     next();
 });
 
@@ -49,7 +57,7 @@ app.get('/', (req, res) => {
     });
 });
 
-// Ruta del mapa (requiere autenticación)
+// Ruta del s (requiere autenticación)
 app.get('/mapa', async (req, res) => {
     // Verificar que el usuario esté autenticado
     if (!req.session.user) {
@@ -105,13 +113,29 @@ app.post('/login', async (req, res) => {
     }
     
     try {
-        const { email, password } = req.body;
+        const email = sanitizeInput(req.body.email);
+        const password = req.body.password;
         
-        if (!email || !password) {
+        // Validaciones del lado del servidor
+        const errors = [];
+        
+        if (!email) {
+            errors.push('El email es obligatorio');
+        } else if (!validateEmail(email)) {
+            errors.push('El formato del email no es válido');
+        }
+        
+        if (!password) {
+            errors.push('La contraseña es obligatoria');
+        } else if (!validatePassword(password)) {
+            errors.push('La contraseña debe tener al menos 6 caracteres');
+        }
+        
+        if (errors.length > 0) {
             return res.render('layout', {
                 title: 'Iniciar Sesión',
                 pageTitle: 'Login',
-                error: 'Por favor ingresa tu email y contraseña',
+                error: errors.join('. '),
                 user: req.session.user || null,
                 pageView: 'login'
             });
@@ -183,46 +207,64 @@ app.post('/register', async (req, res) => {
     }
     
     try {
-        const { 
-            email,
-            password, 
-            nombres, 
-            apellidoPaterno, 
-            apellidoMaterno,
-            preguntaSecreta,
-            respuestaSecreta,
-            acceptTerms 
-        } = req.body;
+        // Sanitizar entradas
+        const email = sanitizeInput(req.body.email);
+        const password = req.body.password;
+        const nombres = sanitizeInput(req.body.nombres);
+        const apellidoPaterno = sanitizeInput(req.body.apellidoPaterno);
+        const apellidoMaterno = sanitizeInput(req.body.apellidoMaterno);
+        const preguntaSecreta = sanitizeInput(req.body.preguntaSecreta);
+        const respuestaSecreta = sanitizeInput(req.body.respuestaSecreta);
+        const acceptTerms = req.body.acceptTerms;
+
+        // Validaciones del lado del servidor
+        const errors = [];
 
         // Validación de términos y condiciones
         if (!acceptTerms) {
-            return res.render('layout', {
-                title: 'Registro',
-                pageTitle: 'Registro',
-                error: 'Debes aceptar los términos y condiciones para continuar',
-                user: req.session.user || null,
-                pageView: 'register'
-            });
+            errors.push('Debes aceptar los términos y condiciones para continuar');
         }
 
         // Validación de campos requeridos
-        if (!email || !password || !nombres || !apellidoPaterno || !apellidoMaterno || !preguntaSecreta || !respuestaSecreta) {
-            return res.render('layout', {
-                title: 'Registro',
-                pageTitle: 'Registro',
-                error: 'Por favor completa todos los campos obligatorios',
-                user: req.session.user || null,
-                pageView: 'register'
-            });
+        if (!email) errors.push('El email es obligatorio');
+        if (!password) errors.push('La contraseña es obligatoria');
+        if (!nombres) errors.push('Los nombres son obligatorios');
+        if (!apellidoPaterno) errors.push('El apellido paterno es obligatorio');
+        if (!apellidoMaterno) errors.push('El apellido materno es obligatorio');
+        if (!preguntaSecreta) errors.push('La pregunta secreta es obligatoria');
+        if (!respuestaSecreta) errors.push('La respuesta secreta es obligatoria');
+
+        // Validaciones de formato
+        if (email && !validateEmail(email)) {
+            errors.push('El formato del email no es válido');
+        }
+        
+        if (password && !validatePassword(password)) {
+            errors.push('La contraseña debe tener al menos 6 caracteres');
+        }
+        
+        if (nombres && !validateName(nombres)) {
+            errors.push('Los nombres solo pueden contener letras y espacios');
+        }
+        
+        if (apellidoPaterno && !validateName(apellidoPaterno)) {
+            errors.push('El apellido paterno solo puede contener letras y espacios');
+        }
+        
+        if (apellidoMaterno && !validateName(apellidoMaterno)) {
+            errors.push('El apellido materno solo puede contener letras y espacios');
+        }
+        
+        if (respuestaSecreta && !validateSecretAnswer(respuestaSecreta)) {
+            errors.push('La respuesta secreta debe tener al menos 3 caracteres');
         }
 
-        // Validación de formato de nombres (solo letras y espacios)
-        const namePattern = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
-        if (!namePattern.test(nombres) || !namePattern.test(apellidoPaterno) || !namePattern.test(apellidoMaterno)) {
+        // Si hay errores, mostrarlos
+        if (errors.length > 0) {
             return res.render('layout', {
                 title: 'Registro',
                 pageTitle: 'Registro',
-                error: 'Los nombres y apellidos solo pueden contener letras y espacios',
+                error: errors.join('. '),
                 user: req.session.user || null,
                 pageView: 'register'
             });
@@ -582,11 +624,47 @@ app.get('/api/mapa', async (req, res) => {
     }
 });
 
-// API para obtener pines
+// API para obtener pines (desde base de datos + backend para coordenadas)
 app.get('/api/pines', async (req, res) => {
     try {
-        const response = await axios.get(`${BACKEND_URL}/api/pines`);
-        res.json(response.data);
+        // Obtener pines de la base de datos
+        const pinesDB = await Pin.findAll();
+        
+        // Obtener pines del backend (que incluye coordenadas)
+        let pinesBackend = [];
+        try {
+            const response = await axios.get(`${BACKEND_URL}/api/pines`);
+            pinesBackend = response.data;
+        } catch (backendError) {
+            console.warn('Backend no disponible para coordenadas:', backendError.message);
+        }
+
+        // Combinar datos: información de BD + coordenadas del backend
+        const pinesCombinados = pinesDB.map(pinDB => {
+            const pinBackend = pinesBackend.find(p => p.id === pinDB.id);
+            const pinData = {
+                ...pinDB.toJSON()
+            };
+            
+            // Solo agregar coordenadas si existen en el backend
+            if (pinBackend && pinBackend.lat !== null && pinBackend.lng !== null) {
+                pinData.lat = pinBackend.lat;
+                pinData.lng = pinBackend.lng;
+                // Convertir para compatibilidad con frontend
+                pinData.x = pinBackend.lng;  // lng corresponde a x
+                pinData.y = pinBackend.lat;  // lat corresponde a y
+            } else {
+                // Sin coordenadas
+                pinData.lat = null;
+                pinData.lng = null;
+                pinData.x = null;
+                pinData.y = null;
+            }
+            
+            return pinData;
+        });
+
+        res.json(pinesCombinados);
     } catch (error) {
         console.error('Error al obtener pines:', error.message);
         res.status(500).json({ error: 'Error al obtener pines' });
@@ -594,24 +672,229 @@ app.get('/api/pines', async (req, res) => {
 });
 
 app.post('/api/pines', async (req, res) => {
+    // Verificar autenticación
+    if (!req.session.user) {
+        console.log('❌ Error: Usuario no autenticado');
+        return res.status(401).json({ error: 'Debes iniciar sesión para crear pines' });
+    }
+
     try {
-        const response = await axios.post(`${BACKEND_URL}/api/pines`, req.body);
-        res.json(response.data);
+        console.log('📍 Recibiendo petición para crear pin:');
+        console.log('📋 Headers:', JSON.stringify(req.headers, null, 2));
+        console.log('📋 Body completo:', JSON.stringify(req.body, null, 2));
+        console.log('📋 Content-Type:', req.headers['content-type']);
+        
+        const { nombre, tipo, descripcion, lat, lng, latitud, longitud } = req.body;
+        
+        console.log('📋 Datos extraídos:');
+        console.log('  - nombre:', typeof nombre, '=', nombre);
+        console.log('  - tipo:', typeof tipo, '=', tipo);
+        console.log('  - descripcion:', typeof descripcion, '=', descripcion);
+        console.log('  - lat:', typeof lat, '=', lat);
+        console.log('  - lng:', typeof lng, '=', lng);
+        console.log('  - latitud:', typeof latitud, '=', latitud);
+        console.log('  - longitud:', typeof longitud, '=', longitud);
+
+        // Validar datos requeridos (nombre y tipo son obligatorios, coordenadas opcionales)
+        if (!nombre || !tipo) {
+            console.log('❌ Error: Faltan datos requeridos');
+            console.log('❌ nombre válido:', !!nombre, 'tipo válido:', !!tipo);
+            return res.status(400).json({ error: 'Faltan datos requeridos: nombre y tipo' });
+        }
+
+        console.log('✅ Datos válidos, creando pin en base de datos...');
+
+        // Determinar coordenadas finales (priorizar latitud/longitud, luego lat/lng)
+        const coordenadasFinales = {
+            latitud: latitud !== null && latitud !== undefined ? parseFloat(latitud) : 
+                    (lat !== null && lat !== undefined ? parseFloat(lat) : null),
+            longitud: longitud !== null && longitud !== undefined ? parseFloat(longitud) : 
+                     (lng !== null && lng !== undefined ? parseFloat(lng) : null)
+        };
+
+        // Preparar datos para la base de datos (incluyendo coordenadas geográficas si están disponibles)
+        const pinData = {
+            nombre: nombre.trim(),
+            tipo: tipo.trim(),
+            descripcion: descripcion?.trim() || '',
+            latitud: coordenadasFinales.latitud,
+            longitud: coordenadasFinales.longitud,
+            usuario_id: req.session.user.id
+        };
+
+        console.log('📊 Datos para BD (con coordenadas geográficas):', pinData);
+        const pinDB = await Pin.create(pinData);
+        console.log('✅ Pin creado en BD con ID:', pinDB.id, 'lat:', pinDB.latitud, 'lng:', pinDB.longitud);
+
+        // Solo enviar al backend si hay coordenadas
+        let pinBackend = null;
+        if ((lat !== null && lng !== null) || (x !== null && y !== null)) {
+            console.log('📍 Enviando coordenadas al backend...');
+            const backendData = {
+                id: pinDB.id,
+                nombre: pinDB.nombre,
+                tipo: pinDB.tipo,
+                descripcion: pinDB.descripcion,
+                // Usar las coordenadas que estén disponibles
+                lat: lat !== null ? lat : y,  // y corresponde a lat en el sistema de porcentajes
+                lng: lng !== null ? lng : x   // x corresponde a lng en el sistema de porcentajes
+            };
+
+            try {
+                const backendResponse = await axios.post(`${BACKEND_URL}/api/pines`, backendData);
+                pinBackend = backendResponse.data;
+                console.log('✅ Pin enviado al backend:', pinBackend);
+            } catch (backendError) {
+                console.warn('⚠️ Error enviando al backend:', backendError.message);
+                // No eliminar de BD si falla el backend, ya que las coordenadas son opcionales
+            }
+        } else {
+            console.log('ℹ️ Pin creado sin coordenadas (temporal)');
+        }
+
+        // Responder con datos combinados
+        const responseData = {
+            ...pinDB.toJSON(),
+            success: true,
+            message: 'Pin creado exitosamente'
+        };
+
+        // Agregar coordenadas si están disponibles
+        if (pinBackend) {
+            responseData.lat = pinBackend.lat;
+            responseData.lng = pinBackend.lng;
+            responseData.x = pinBackend.lng;  // lng corresponde a x en el frontend
+            responseData.y = pinBackend.lat;  // lat corresponde a y en el frontend
+        } else if (x !== null && y !== null) {
+            responseData.x = x;
+            responseData.y = y;
+        }
+
+        console.log('🎉 Pin creado exitosamente. Respuesta:', responseData);
+        res.json(responseData);
+
     } catch (error) {
-        console.error('Error al agregar pin:', error.message);
-        res.status(500).json({ error: 'Error al agregar pin' });
+        console.error('💥 Error al agregar pin:', error);
+        console.error('📋 Stack trace:', error.stack);
+        
+        if (error.response?.status === 400) {
+            res.status(400).json({ error: 'Datos inválidos' });
+        } else {
+            res.status(500).json({ error: 'Error al agregar pin: ' + error.message });
+        }
+    }
+});
+
+// Endpoint para actualizar coordenadas de un pin
+app.put('/api/pines/:id', async (req, res) => {
+    // Verificar autenticación
+    if (!req.session.user) {
+        return res.status(401).json({ error: 'Debes iniciar sesión para actualizar pines' });
+    }
+
+    try {
+        const pinId = parseInt(req.params.id);
+        const { latitud, longitud } = req.body;
+        
+        // Validar que se proporcionaron las coordenadas
+        if (!latitud || !longitud) {
+            return res.status(400).json({ error: 'Latitud y longitud son requeridas' });
+        }
+        
+        // Validar que las coordenadas están en el rango válido para Hidalgo
+        if (latitud < 19.6 || latitud > 21.4 || longitud < -99.8 || longitud > -97.8) {
+            return res.status(400).json({ error: 'Coordenadas fuera del rango válido para Hidalgo' });
+        }
+        
+        // Verificar que el pin existe en la BD
+        const pin = await Pin.findById(pinId);
+        if (!pin) {
+            return res.status(404).json({ error: 'Pin no encontrado' });
+        }
+        
+        // Actualizar las coordenadas
+        const updatedPin = await Pin.update(pinId, {
+            latitud: latitud,
+            longitud: longitud
+        });
+        
+        console.log(`Pin ${pinId} actualizado: latitud=${latitud}, longitud=${longitud}`);
+        res.json({ 
+            message: 'Coordenadas actualizadas correctamente',
+            pin: updatedPin 
+        });
+        
+    } catch (error) {
+        console.error('Error al actualizar coordenadas del pin:', error);
+        res.status(500).json({ error: 'Error al actualizar pin: ' + error.message });
     }
 });
 
 app.delete('/api/pines/:id', async (req, res) => {
+    // Verificar autenticación
+    if (!req.session.user) {
+        return res.status(401).json({ error: 'Debes iniciar sesión para eliminar pines' });
+    }
+
     try {
-        const response = await axios.delete(`${BACKEND_URL}/api/pines/${req.params.id}`);
-        res.json(response.data);
+        const pinId = parseInt(req.params.id);
+        
+        // Verificar que el pin existe en la BD
+        const pin = await Pin.findById(pinId);
+        if (!pin) {
+            return res.status(404).json({ error: 'Pin no encontrado' });
+        }
+
+        // Verificar permisos (solo el creador o admin puede eliminar)
+        if (pin.usuario_id !== req.session.user.id && req.session.user.role !== 'admin') {
+            return res.status(403).json({ error: 'No tienes permisos para eliminar este pin' });
+        }
+
+        // Eliminar del backend primero
+        try {
+            await axios.delete(`${BACKEND_URL}/api/pines/${pinId}`);
+        } catch (backendError) {
+            console.warn('Error eliminando del backend:', backendError.message);
+            // Continuar aunque falle el backend
+        }
+
+        // Eliminar de la base de datos (eliminación lógica)
+        await Pin.deleteById(pinId);
+
+        res.json({ 
+            success: true, 
+            message: 'Pin eliminado exitosamente',
+            id: pinId 
+        });
+
     } catch (error) {
         console.error('Error al eliminar pin:', error.message);
         res.status(500).json({ error: 'Error al eliminar pin' });
     }
 });
+
+// Funciones de validación para el servidor
+function validateEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email) && email.length <= 100;
+}
+
+function validatePassword(password) {
+    return password && password.length >= 6 && password.length <= 100;
+}
+
+function validateName(name) {
+    const namePattern = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+    return namePattern.test(name) && name.trim().length >= 2 && name.length <= 100;
+}
+
+function validateSecretAnswer(answer) {
+    return answer && answer.trim().length >= 3 && answer.length <= 100;
+}
+
+function sanitizeInput(input) {
+    return typeof input === 'string' ? input.trim() : '';
+}
 
 // Función para verificar estado del backend
 async function verificarBackend() {
@@ -641,14 +924,19 @@ async function startServer() {
         console.log('🔄 Inicializando servidor...');
         await initializeDatabase();
         
-        const server = app.listen(PORT, () => {
+        const server = app.listen(PORT, '0.0.0.0', () => {
             console.log(`🚀 Servidor frontend ejecutándose en http://localhost:${PORT}`);
-            console.log(`� Conectando al backend en http://localhost:5000`);
+            console.log(`📱 También disponible en tu red local: http://172.16.20.25:${PORT}`);
+            console.log(`🔗 Conectando al backend en http://localhost:5000`);
             console.log(`🎉 Base de datos inicializada correctamente`);
             console.log('');
             console.log('📝 Credenciales de administrador por defecto:');
             console.log('   Email: admin@sistema.com');
             console.log('   Contraseña: admin123');
+            console.log('');
+            console.log('📲 Para acceder desde tu teléfono:');
+            console.log('   1. Conecta tu teléfono a la misma red WiFi');
+            console.log('   2. Abre el navegador y ve a: http://172.16.20.25:3000');
             console.log('');
         });
         

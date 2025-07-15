@@ -119,6 +119,41 @@ def manejar_pines():
         return jsonify({"error": str(e)}), 500
 
 
+# Ruta para actualizar un pin por id
+@app.route('/api/pines/<int:pin_id>', methods=['PUT'])
+def actualizar_pin(pin_id):
+    try:
+        datos = request.json or {}
+        
+        with open(PINES_FILE, 'r') as f:
+            pines = json.load(f)
+        
+        # Buscar el pin a actualizar
+        pin_encontrado = None
+        for i, pin in enumerate(pines):
+            if pin.get('id') == pin_id:
+                pin_encontrado = i
+                break
+        
+        if pin_encontrado is None:
+            return jsonify({"error": "Pin no encontrado"}), 404
+        
+        # Actualizar los campos proporcionados
+        for campo, valor in datos.items():
+            if campo != 'id':  # No permitir cambiar el ID
+                pines[pin_encontrado][campo] = valor
+        
+        # Guardar los cambios
+        with open(PINES_FILE, 'w') as f:
+            json.dump(pines, f, indent=2, ensure_ascii=False)
+        
+        return jsonify(pines[pin_encontrado]), 200
+        
+    except Exception as e:
+        print(f"Error al actualizar pin: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
 # Ruta para eliminar un pin por id
 @app.route('/api/pines/<int:pin_id>', methods=['DELETE'])
 def eliminar_pin(pin_id):
