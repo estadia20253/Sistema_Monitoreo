@@ -172,3 +172,43 @@ typings/
 
 # Serverless directories
 .serverless
+
+# Archivos de base de datos locales
+*.db
+*.sqlite3
+*.sqlite
+
+# Archivos de migraciones temporales
+migrations/
+alembic/
+
+# Archivos de configuración sensibles
+settings.py
+config.py
+frontend/config/database.js
+
+# Archivos de exportación o dumps
+*.sql
+*.dump
+
+# Caché de Python
+.mypy_cache/
+.pytest_cache/
+
+# Caché de Node.js
+.next/
+.nuxt/
+.parcel-cache/
+.cache/
+
+# Lock y PID
+*.lock
+*.pid
+
+# Docker config
+docker-compose.override.yml
+.env.docker
+
+# Configuración de test locales
+test.env
+test_settings.py
