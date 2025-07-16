@@ -189,7 +189,7 @@ function cargarPines() {
         });
 }
 
-// Función actualizada para mostrar pines con Google Maps
+// Función para mostrar pines con Google Maps
 function mostrarPines() {
     console.log('🎯 Función mostrarPines llamada');
     
@@ -280,6 +280,7 @@ function mostrarPines() {
         // Aplicar filtros después de crear todos los markers
         setTimeout(() => {
             aplicarFiltros();
+            actualizarEstadisticas();
         }, 100);
         
         // Mostrar botones después de crear los pines
@@ -288,6 +289,7 @@ function mostrarPines() {
         console.log('📭 No hay pines para mostrar');
         // Mostrar botón agregar incluso si no hay pines
         mostrarBotonAgregarPin();
+        actualizarEstadisticas();
     }
     
     console.log('🏁 Función mostrarPines completada');
@@ -319,6 +321,9 @@ function getColorPorTipo(tipo) {
         case 'presas':
         case 'presa':
             return '#e67e22';    // Naranja para presas
+        case 'manantial':
+        case 'manantiales':
+            return '#8e44ad';    // Morado para manantiales
         default: return '#95a5a6';          // Gris por defecto
     }
 }
@@ -335,6 +340,9 @@ function getDescripcionTipo(tipo) {
         case 'presas':
         case 'presa':
             return 'Presa';
+        case 'manantial':
+        case 'manantiales':
+            return 'Manantial';
         default: return 'Desconocido';
     }
 }
@@ -351,6 +359,9 @@ function getIconoPorTipo(tipo) {
         case 'presas':
         case 'presa':
             return '🏗️';
+        case 'manantial':
+        case 'manantiales':
+            return '💧';
         default: return '📍';
     }
 }
@@ -808,28 +819,84 @@ function cerrarDetalles() {
     }
 }
 
-// Función para aplicar filtros (placeholder)
+// Función para actualizar estadísticas (para vista de administrador)
+function actualizarEstadisticas() {
+    // Contar pines por tipo
+    let totalRios = 0;
+    let totalLagos = 0;
+    let totalPresas = 0;
+    let totalManantiales = 0;
+    let totalGeneral = 0;
+
+    pinesData.forEach(pin => {
+        if (pin.lat !== null && pin.lng !== null) {
+            totalGeneral++;
+            
+            switch(pin.tipo) {
+                case 'rios':
+                case 'rio':
+                    totalRios++;
+                    break;
+                case 'lagos':
+                case 'lago':
+                    totalLagos++;
+                    break;
+                case 'presas':
+                case 'presa':
+                    totalPresas++;
+                    break;
+                case 'manantial':
+                case 'manantiales':
+                    totalManantiales++;
+                    break;
+            }
+        }
+    });
+
+    // Actualizar elementos de estadísticas (solo si existen - vista admin)
+    const totalPinesEl = document.getElementById('total-pines');
+    const totalRiosEl = document.getElementById('total-rios');
+    const totalLagosEl = document.getElementById('total-lagos');
+    const totalPresasEl = document.getElementById('total-presas');
+    const totalManatialesEl = document.getElementById('total-manantiales');
+    const totalPinesUserEl = document.getElementById('total-pines-user');
+
+    if (totalPinesEl) totalPinesEl.textContent = totalGeneral;
+    if (totalRiosEl) totalRiosEl.textContent = totalRios;
+    if (totalLagosEl) totalLagosEl.textContent = totalLagos;
+    if (totalPresasEl) totalPresasEl.textContent = totalPresas;
+    if (totalManatialesEl) totalManatialesEl.textContent = totalManantiales;
+    if (totalPinesUserEl) totalPinesUserEl.textContent = totalGeneral;
+
+    console.log(`📊 Estadísticas actualizadas: Total: ${totalGeneral}, Ríos: ${totalRios}, Lagos: ${totalLagos}, Presas: ${totalPresas}, Manantiales: ${totalManantiales}`);
+}
+
+// Función para aplicar filtros (ahora funcional para todos los tipos)
 function aplicarFiltros() {
     const filtroRios = document.getElementById('filtro-rios');
     const filtroLagos = document.getElementById('filtro-lagos');
     const filtroPresas = document.getElementById('filtro-presas');
-    
-    if (!filtroRios || !filtroLagos || !filtroPresas) {
-        return; // No hay filtros disponibles
-    }
+    const filtroManantiales = document.getElementById('filtro-manantial') || document.getElementById('filtro-manantiales');
 
-    const mostrarRios = filtroRios.checked;
-    const mostrarLagos = filtroLagos.checked;
-    const mostrarPresas = filtroPresas.checked;
+    // Si no hay filtros, mostrar todo
+    if (!filtroRios && !filtroLagos && !filtroPresas && !filtroManantiales) {
+        markers.forEach(marker => marker.setVisible(true));
+        return;
+    }
 
     markers.forEach(marker => {
         const pin = marker.pinData;
-        const deberiaSerVisible = 
-            (pin.tipo === 'rios' && mostrarRios) ||
-            (pin.tipo === 'lagos' && mostrarLagos) ||
-            (pin.tipo === 'presas' && mostrarPresas);
-        
-        marker.setVisible(deberiaSerVisible);
+        let visible = true;
+        if (pin.tipo === 'rios' || pin.tipo === 'rio') {
+            visible = filtroRios ? filtroRios.checked : true;
+        } else if (pin.tipo === 'lagos' || pin.tipo === 'lago') {
+            visible = filtroLagos ? filtroLagos.checked : true;
+        } else if (pin.tipo === 'presas' || pin.tipo === 'presa') {
+            visible = filtroPresas ? filtroPresas.checked : true;
+        } else if (pin.tipo === 'manantial' || pin.tipo === 'manantiales') {
+            visible = filtroManantiales ? filtroManantiales.checked : true;
+        }
+        marker.setVisible(visible);
     });
 }
 
@@ -968,16 +1035,23 @@ async function guardarNuevaPosicionPin(pin, latitud, longitud) {
     }
 }
 
-// Funciones placeholder para edición y eliminación de pines
+// Funciones para edición y eliminación de pines
 function editarPin(pinId) {
     console.log(`Editando pin ID: ${pinId}`);
     mostrarMensajeConfirmacion('Función de edición en desarrollo', 'info');
 }
 
-function eliminarPin(pinId) {
-    console.log(`Eliminando pin ID: ${pinId}`);
-    if (confirm('¿Estás seguro de que quieres eliminar este pin?')) {
-        mostrarMensajeConfirmacion('Función de eliminación en desarrollo', 'info');
+async function eliminarPin(pinId) {
+    if (!confirm('¿Estás seguro de que quieres eliminar este pin?')) return;
+    try {
+        const response = await fetch(`/api/pines/${pinId}`, { method: 'DELETE' });
+        if (!response.ok) throw new Error('No se pudo eliminar el pin');
+        mostrarMensajeConfirmacion('Pin eliminado correctamente', 'agregar');
+        await cargarPines();
+        cerrarDetalles();
+    } catch (error) {
+        mostrarMensajeConfirmacion('Error al eliminar el pin', 'error');
+        console.error(error);
     }
 }
 
@@ -1044,28 +1118,301 @@ function dmsADecimal(grados, minutos, segundos, direccion) {
     return decimal;
 }
 
-// Función específica para agregar el pin en las coordenadas solicitadas
+// Función específica para agregar pines en las coordenadas de todos los cuerpos de agua de Hidalgo
 async function agregarPinCoordinadasEspecificas() {
-    // Coordenadas: 20°38'55"N 98°59'41"W
-    const lat = dmsADecimal(20, 38, 55, 'N');  // 20.6486111
-    const lng = dmsADecimal(98, 59, 41, 'W');  // -98.9947222
-    
-    console.log(`📍 Coordenadas convertidas: ${lat}, ${lng}`);
-    
     try {
-        const pin = await agregarPinEnCoordenadas(
-            lat, 
-            lng, 
-            'rio',  // Tipo de ecosistema
-            'Pin Coordenadas Específicas',  // Nombre
-            `Pin agregado en coordenadas 20°38'55"N 98°59'41"W (${lat.toFixed(6)}, ${lng.toFixed(6)})`  // Descripción
-        );
+        console.log('🌊 Agregando pines para todos los cuerpos de agua de Hidalgo...');
         
-        console.log('🎉 Pin agregado exitosamente:', pin);
-        return pin;
+        const pinesAgregados = [];
+        
+        // RÍOS
+        
+        // Río Moctezuma: 21°58′03″N, 98°33′47″O (Confluencia con el Río Tula en la Presa Zimapán)
+        const latMoctezuma = dmsADecimal(21, 58, 3, 'N');
+        const lngMoctezuma = dmsADecimal(98, 33, 47, 'W');
+        pinesAgregados.push(await agregarPinEnCoordenadas(
+            latMoctezuma, lngMoctezuma, 'rio', 'Río Moctezuma',
+            'Confluencia con el Río Tula en la Presa Zimapán'
+        ));
+        
+        // Río Tula: 20°35′02″N, 99°19′43″O (Paso por Tula de Allende)
+        const latTula = dmsADecimal(20, 35, 2, 'N');
+        const lngTula = dmsADecimal(99, 19, 43, 'W');
+        pinesAgregados.push(await agregarPinEnCoordenadas(
+            latTula, lngTula, 'rio', 'Río Tula',
+            'Paso por Tula de Allende'
+        ));
+        
+        // Río Amajac: 21°15′08″N, 98°46′53″O (Nacimiento en la Sierra de Pachuca)
+        const latAmajac = dmsADecimal(21, 15, 8, 'N');
+        const lngAmajac = dmsADecimal(98, 46, 53, 'W');
+        pinesAgregados.push(await agregarPinEnCoordenadas(
+            latAmajac, lngAmajac, 'rio', 'Río Amajac',
+            'Nacimiento en la Sierra de Pachuca'
+        ));
+        
+        // Río San Juan: 20°32′31″N, 99°51′27″O (Confluencia con el Río Tula, límite con Querétaro)
+        const latSanJuan = dmsADecimal(20, 32, 31, 'N');
+        const lngSanJuan = dmsADecimal(99, 51, 27, 'W');
+        pinesAgregados.push(await agregarPinEnCoordenadas(
+            latSanJuan, lngSanJuan, 'rio', 'Río San Juan',
+            'Confluencia con el Río Tula, límite con Querétaro'
+        ));
+        
+        // Río Salado: 20°08′27″N, 99°14′54″O (Desembocadura en el Río Tula)
+        const latSalado = dmsADecimal(20, 8, 27, 'N');
+        const lngSalado = dmsADecimal(99, 14, 54, 'W');
+        pinesAgregados.push(await agregarPinEnCoordenadas(
+            latSalado, lngSalado, 'rio', 'Río Salado',
+            'Desembocadura en el Río Tula'
+        ));
+        
+        // Río Actopan: 20°16′12″N, 98°56′42″O (Punto de interés en Puente de Dios, Mesa Chica)
+        const latActopan = dmsADecimal(20, 16, 12, 'N');
+        const lngActopan = dmsADecimal(98, 56, 42, 'W');
+        pinesAgregados.push(await agregarPinEnCoordenadas(
+            latActopan, lngActopan, 'rio', 'Río Actopan',
+            'Punto de interés en Puente de Dios, Mesa Chica'
+        ));
+        
+        // Río Cazones: 20°43′30″N, 97°12′01″O (Origen en la sierra de Hidalgo, al este de Tulancingo)
+        const latCazones = dmsADecimal(20, 43, 30, 'N');
+        const lngCazones = dmsADecimal(97, 12, 1, 'W');
+        pinesAgregados.push(await agregarPinEnCoordenadas(
+            latCazones, lngCazones, 'rio', 'Río Cazones',
+            'Origen en la sierra de Hidalgo, al este de Tulancingo'
+        ));
+        
+        // Río Pantepec: 20°56′00″N, 97°44′00″O (Nacimiento en la Sierra Madre Oriental)
+        const latPantepec = dmsADecimal(20, 56, 0, 'N');
+        const lngPantepec = dmsADecimal(97, 44, 0, 'W');
+        pinesAgregados.push(await agregarPinEnCoordenadas(
+            latPantepec, lngPantepec, 'rio', 'Río Pantepec',
+            'Nacimiento en la Sierra Madre Oriental'
+        ));
+        
+        // Río Chicavasco: 20°30′22″N, 99°14′05″O (Nacimiento en la Sierra de Pachuca)
+        const latChicavasco = dmsADecimal(20, 30, 22, 'N');
+        const lngChicavasco = dmsADecimal(99, 14, 5, 'W');
+        pinesAgregados.push(await agregarPinEnCoordenadas(
+            latChicavasco, lngChicavasco, 'rio', 'Río Chicavasco',
+            'Nacimiento en la Sierra de Pachuca'
+        ));
+        
+        // Río Metztitlán: 20°35′04″N, 98°45′47″O (Punto de interés en la Barranca de Metztitlán)
+        const latMetztitlan = dmsADecimal(20, 35, 4, 'N');
+        const lngMetztitlan = dmsADecimal(98, 45, 47, 'W');
+        pinesAgregados.push(await agregarPinEnCoordenadas(
+            latMetztitlan, lngMetztitlan, 'rio', 'Río Metztitlán',
+            'Punto de interés en la Barranca de Metztitlán'
+        ));
+        
+        // Río de las Avenidas: 20°06′53.55″N, 98°44′22.68″O (Punto representativo en Pachuca)
+        const latAvenidas = 20 + 6/60 + 53.55/3600;
+        const lngAvenidas = -(98 + 44/60 + 22.68/3600);
+        pinesAgregados.push(await agregarPinEnCoordenadas(
+            latAvenidas, lngAvenidas, 'rio', 'Río de las Avenidas',
+            'Punto representativo en Pachuca'
+        ));
+        
+        // Río Alfajayucan: 20°29′30″N, 99°23′15″O
+        const latAlfajayucan = dmsADecimal(20, 29, 30, 'N');
+        const lngAlfajayucan = dmsADecimal(99, 23, 15, 'W');
+        pinesAgregados.push(await agregarPinEnCoordenadas(
+            latAlfajayucan, lngAlfajayucan, 'rio', 'Río Alfajayucan',
+            'Río ubicado en el municipio de Alfajayucan'
+        ));
+        
+        // Río Tepeji: 19°45′37″N, 99°29′21″O
+        const latTepeji = dmsADecimal(19, 45, 37, 'N');
+        const lngTepeji = dmsADecimal(99, 29, 21, 'W');
+        pinesAgregados.push(await agregarPinEnCoordenadas(
+            latTepeji, lngTepeji, 'rio', 'Río Tepeji',
+            'Río que pasa por la región de Tepeji del Río'
+        ));
+        
+        // Río Rosas: 20°02′18″N, 99°27′02″O
+        const latRosas = dmsADecimal(20, 2, 18, 'N');
+        const lngRosas = dmsADecimal(99, 27, 2, 'W');
+        pinesAgregados.push(await agregarPinEnCoordenadas(
+            latRosas, lngRosas, 'rio', 'Río Rosas',
+            'Río ubicado en la región central de Hidalgo'
+        ));
+        
+        // Río El Salto: 19°56′12″N, 99°16′58″O
+        const latElSalto = dmsADecimal(19, 56, 12, 'N');
+        const lngElSalto = dmsADecimal(99, 16, 58, 'W');
+        pinesAgregados.push(await agregarPinEnCoordenadas(
+            latElSalto, lngElSalto, 'rio', 'Río El Salto',
+            'Río con formaciones de cascadas naturales'
+        ));
+        
+        // Río Cuautitlán: 19°35′36″N, 99°26′19″O
+        const latCuautitlan = dmsADecimal(19, 35, 36, 'N');
+        const lngCuautitlan = dmsADecimal(99, 26, 19, 'W');
+        pinesAgregados.push(await agregarPinEnCoordenadas(
+            latCuautitlan, lngCuautitlan, 'rio', 'Río Cuautitlán',
+            'Río en la región sur de Hidalgo'
+        ));
+        
+        // Río Tlautla: 19°57′45″N, 99°23′06″O
+        const latTlautla = dmsADecimal(19, 57, 45, 'N');
+        const lngTlautla = dmsADecimal(99, 23, 6, 'W');
+        pinesAgregados.push(await agregarPinEnCoordenadas(
+            latTlautla, lngTlautla, 'rio', 'Río Tlautla',
+            'Río que atraviesa la región central del estado'
+        ));
+        
+        // Río Calabozo: 21°1′51″N, 98°17′6″W (Coordenadas de la comunidad de Coatzonco, Huautla, Hidalgo)
+        const latCalabozo = dmsADecimal(21, 1, 51, 'N');
+        const lngCalabozo = dmsADecimal(98, 17, 6, 'W');
+        pinesAgregados.push(await agregarPinEnCoordenadas(
+            latCalabozo, lngCalabozo, 'rio', 'Río Calabozo',
+            'Sección del río en la comunidad de Coatzonco, Huautla'
+        ));
+        
+        // LAGOS Y LAGUNAS
+        
+        // Laguna de Metztitlán (punto central): 20°41′N, 98°51′30″O
+        const latLagunaMetztitlan = dmsADecimal(20, 41, 0, 'N');
+        const lngLagunaMetztitlan = dmsADecimal(98, 51, 30, 'W');
+        pinesAgregados.push(await agregarPinEnCoordenadas(
+            latLagunaMetztitlan, lngLagunaMetztitlan, 'lago', 'Laguna de Metztitlán',
+            'Reserva de la biosfera, humedal importante para aves migratorias'
+        ));
+        
+        // Laguna de Tecocomulco (punto central): 19°51′44″N, 98°23′49″O
+        const latTecocomulco = dmsADecimal(19, 51, 44, 'N');
+        const lngTecocomulco = dmsADecimal(98, 23, 49, 'W');
+        pinesAgregados.push(await agregarPinEnCoordenadas(
+            latTecocomulco, lngTecocomulco, 'lago', 'Laguna de Tecocomulco',
+            'Lago artificial importante para la región de Tulancingo'
+        ));
+        
+        // PRESAS
+        
+        // Presa Requena: 19°56′41″N, 99°19′10″O
+        const latRequena = dmsADecimal(19, 56, 41, 'N');
+        const lngRequena = dmsADecimal(99, 19, 10, 'W');
+        pinesAgregados.push(await agregarPinEnCoordenadas(
+            latRequena, lngRequena, 'presa', 'Presa Requena',
+            'Presa para control de agua y generación hidroeléctrica'
+        ));
+        
+        // Presa Endhó: 20°08′10″N, 99°22′16″O
+        const latEndho = dmsADecimal(20, 8, 10, 'N');
+        const lngEndho = dmsADecimal(99, 22, 16, 'W');
+        pinesAgregados.push(await agregarPinEnCoordenadas(
+            latEndho, lngEndho, 'presa', 'Presa Endhó',
+            'Importante presa para abastecimiento de agua regional'
+        ));
+        
+        // Presa La Esperanza: 20°06′24.290″N, 98°08′58.761″O
+        const latEsperanza = 20 + 6/60 + 24.290/3600;
+        const lngEsperanza = -(98 + 8/60 + 58.761/3600);
+        pinesAgregados.push(await agregarPinEnCoordenadas(
+            latEsperanza, lngEsperanza, 'presa', 'Presa La Esperanza',
+            'Presa ubicada en la región oriental de Hidalgo'
+        ));
+        
+        // Presa El Cedral: 20°10′58″N, 98°44′46″O
+        const latCedral = dmsADecimal(20, 10, 58, 'N');
+        const lngCedral = dmsADecimal(98, 44, 46, 'W');
+        pinesAgregados.push(await agregarPinEnCoordenadas(
+            latCedral, lngCedral, 'presa', 'Presa El Cedral',
+            'Presa para control hidrológico regional'
+        ));
+        
+        // Presa Javier Rojo Gómez (La Peña): 20°21′24″N, 99°19′22″O
+        const latLaPena = dmsADecimal(20, 21, 24, 'N');
+        const lngLaPena = dmsADecimal(99, 19, 22, 'W');
+        pinesAgregados.push(await agregarPinEnCoordenadas(
+            latLaPena, lngLaPena, 'presa', 'Presa Javier Rojo Gómez (La Peña)',
+            'Presa también conocida como La Peña'
+        ));
+        
+        // Presa Vicente Aguirre (Las Golondrinas): 20.43194°N, -99.36778°O
+        pinesAgregados.push(await agregarPinEnCoordenadas(
+            20.43194, -99.36778, 'presa', 'Presa Vicente Aguirre (Las Golondrinas)',
+            'Presa conocida también como Las Golondrinas'
+        ));
+        
+        // Presa Zimapán (Ingeniero Fernando Hiriart Balderrama): 21°58′03″N, 98°33′47″O
+        // Nota: Mismas coordenadas que Río Moctezuma ya que es donde nace de la presa
+        pinesAgregados.push(await agregarPinEnCoordenadas(
+            latMoctezuma, lngMoctezuma, 'presa', 'Presa Zimapán (Ing. Fernando Hiriart Balderrama)',
+            'Gran presa hidroeléctrica donde convergen los ríos Moctezuma y Tula'
+        ));
+        
+        // OTROS CUERPOS ACUÁTICOS
+        
+        // Grutas de Tolantongo: 20°39′01″N, 98°59′58″O
+        const latGrutas = dmsADecimal(20, 39, 1, 'N');
+        const lngGrutas = dmsADecimal(98, 59, 58, 'W');
+        pinesAgregados.push(await agregarPinEnCoordenadas(
+            latGrutas, lngGrutas, 'lago', 'Grutas de Tolantongo',
+            'Complejo de aguas termales y grutas naturales'
+        ));
+        
+        // Río Tolantongo (asociado a grutas): 20°40′20″N, 98°56′10″O
+        const latRioTolantongo = dmsADecimal(20, 40, 20, 'N');
+        const lngRioTolantongo = dmsADecimal(98, 56, 10, 'W');
+        pinesAgregados.push(await agregarPinEnCoordenadas(
+            latRioTolantongo, lngRioTolantongo, 'rio', 'Río Tolantongo',
+            'Río asociado al complejo de grutas de aguas termales'
+        ));
+        
+        // Manantiales
+        
+        // Manantial de Pathe: 20°34'40.2"N, 99°41'34.4"W
+        const latPathe = 20 + 34/60 + 40.2/3600;
+        const lngPathe = -(99 + 41/60 + 34.4/3600);
+        pinesAgregados.push(await agregarPinEnCoordenadas(
+            latPathe, lngPathe, 'manantial', 'Manantial de Pathe',
+            'Manantial natural de agua dulce'
+        ));
+        
+        // Manantial de Vito: 19°59′33″N, 99°12′04″O
+        const latVito = dmsADecimal(19, 59, 33, 'N');
+        const lngVito = dmsADecimal(99, 12, 4, 'W');
+        pinesAgregados.push(await agregarPinEnCoordenadas(
+            latVito, lngVito, 'manantial', 'Manantial de Vito',
+            'Manantial ubicado en la región central'
+        ));
+        
+        // Manantial de Dios Padre: 20°27′50″N, 99°11′50″O
+        const latDiosPadre = dmsADecimal(20, 27, 50, 'N');
+        const lngDiosPadre = dmsADecimal(99, 11, 50, 'W');
+        pinesAgregados.push(await agregarPinEnCoordenadas(
+            latDiosPadre, lngDiosPadre, 'manantial', 'Manantial de Dios Padre',
+            'Manantial con nombre religioso tradicional'
+        ));
+        
+        // Manantial de Ajacuba: 20°05′40″N, 99°07′28″O
+        const latAjacuba = dmsADecimal(20, 5, 40, 'N');
+        const lngAjacuba = dmsADecimal(99, 7, 28, 'W');
+        pinesAgregados.push(await agregarPinEnCoordenadas(
+            latAjacuba, lngAjacuba, 'manantial', 'Manantial de Ajacuba',
+            'Manantial ubicado en el municipio de Ajacuba'
+        ));
+        
+        // Manantial de Amajac (Santa María Amajac): 20°06′50″N, 98°44′50″O
+        const latAmajacManantial = dmsADecimal(20, 6, 50, 'N');
+        const lngAmajacManantial = dmsADecimal(98, 44, 50, 'W');
+        pinesAgregados.push(await agregarPinEnCoordenadas(
+            latAmajacManantial, lngAmajacManantial, 'manantial', 'Manantial de Amajac (Santa María Amajac)',
+            'Manantial en la localidad de Santa María Amajac'
+        ));
+        
+        console.log(`🎉 ${pinesAgregados.length} cuerpos de agua agregados exitosamente al mapa de Hidalgo`);
+        
+        mostrarMensajeConfirmacion(`${pinesAgregados.length} cuerpos de agua de Hidalgo agregados exitosamente al mapa`, 'agregar');
+        
+        return pinesAgregados;
         
     } catch (error) {
-        console.error('💥 Error al agregar pin en coordenadas específicas:', error);
+        console.error('💥 Error al agregar cuerpos de agua:', error);
+        mostrarMensajeConfirmacion(`Error al agregar los cuerpos de agua: ${error.message}`, 'error');
         throw error;
     }
 }

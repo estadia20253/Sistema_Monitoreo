@@ -1,55 +1,428 @@
-<section class="map-section">
-    <div class="container-fluid">
-        <div class="map-header">
-            <h2>Mapa de Ecosistemas Acuáticos - Hidalgo</h2>
-            <div class="map-controls">
-                <div id="filtros-ecosistemas" class="filtros-ecosistemas">
-                    <span style="font-weight: bold; color: #2c3e50;">Filtros:</span>
-                    <label class="filter-label">
-                        <input type="checkbox" id="filtro-rio" checked onchange="aplicarFiltros()">
-                        <span style="color: #3498db;">🌊 Ríos</span>
-                    </label>
-                    <label class="filter-label">
-                        <input type="checkbox" id="filtro-lago" checked onchange="aplicarFiltros()">
-                        <span style="color: #2ecc71;">🏞️ Lagos</span>
-                    </label>
-                    <label class="filter-label">
-                        <input type="checkbox" id="filtro-presa" checked onchange="aplicarFiltros()">
-                        <span style="color: #e74c3c;">🏗️ Presas</span>
-                    </label>
-                </div>
-                <button id="btn-editar-pines" onclick="toggleModoEdicion(); if (modoEdicion) mostrarListaPines();" class="btn-editar">
-                    Editar Posiciones
+<<!-- Vista unificada del mapa que se adapta según el rol del usuario -->
+<div id="map-container" class="mapa-container <%= isAdmin ? 'admin-view' : 'user-view' %>">
+    <!-- Panel de control (solo visible para administradores) -->
+    <% if (isAdmin) { %>
+    <div class="admin-panel">
+        <h3>🔧 Panel de Administrador</h3>
+        <div class="admin-controls">
+            <!-- Controles de gestión de pines -->
+            <div class="control-group">
+                <h4>📍 Gestión de Pines</h4>
+                <button id="btn-agregar-pin-coordenadas" class="btn btn-primary" onclick="agregarPinCoordinadasEspecificas()" title="Agregar todos los cuerpos de agua con coordenadas específicas">
+                    🌊 Agregar Cuerpos de Agua
                 </button>
-                <button id="btn-agregar-pin-coordenadas" onclick="agregarPinCoordinadasEspecificas()" class="btn-agregar" title="Agregar pin en 20°38'55&quot;N 98°59'41&quot;W">
-                    📍 Agregar Pin Coordenadas
-                </button>
-                <button id="btn-agregar-pin-clic" onclick="habilitarModoAgregarPin()" class="btn-agregar-clic" title="Haz clic en el mapa para agregar un pin">
+                <button id="btn-agregar-pin-manual" class="btn btn-secondary" onclick="habilitarModoAgregarPin()" title="Agregar pin haciendo clic en el mapa">
                     ➕ Agregar Pin Manual
                 </button>
-            </div>
-        </div>
-        
-        <% if (locals.backendConnected === false) { %>
-            <div class="alert alert-warning">
-                <p>⚠️ No se pudo conectar con el backend. Algunos datos pueden no estar disponibles.</p>
-            </div>
-        <% } %>
-        
-        <div class="mapa-contenedor">
-            <div class="map-container" id="map-container">
-                <!-- Google Maps será insertado aquí -->
-                <div id="google-map" class="google-map"></div>
-                <div class="loading" id="loading">Cargando mapa...</div>
+                <button id="btn-editar-pines" class="btn btn-warning" onclick="toggleModoEdicion()" title="Activar modo de edición para mover pines">
+                    ✏️ Editar Posiciones
+                </button>
             </div>
             
-            <div class="detalles-container" id="detalles-container">
-                <div id="detalles-content" class="detalles-content">
-                    <!-- Los detalles se cargarán aquí dinámicamente -->
+            <!-- Estadísticas -->
+            <div class="control-group">
+                <h4>📊 Estadísticas</h4>
+                <div class="estadisticas-container">
+                    <div class="stat-item">
+                        <span class="stat-label">Total Pines:</span>
+                        <span id="total-pines" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Ríos:</span>
+                        <span id="total-rios" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Lagos:</span>
+                        <span id="total-lagos" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Presas:</span>
+                        <span id="total-presas" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Manantiales:</span>
+                        <span id="total-manantiales" class="stat-value">0</span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</section>
+    <% } %>
+
+    <!-- Panel de filtros (visible para ambos roles, pero en posiciones diferentes) -->
+    <div class="<%= isAdmin ? 'admin-filters' : 'user-filters' %>">
+        <h3>🔍 Filtros</h3>
+        <div class="filtros-container">
+            <label class="filtro-checkbox">
+                <input type="checkbox" id="filtro-rios" checked onchange="aplicarFiltros()">
+                <span class="checkmark tipo-rio">🌊 Ríos</span>
+            </label>
+            <label class="filtro-checkbox">
+                <input type="checkbox" id="filtro-lagos" checked onchange="aplicarFiltros()">
+                <span class="checkmark tipo-lago">🏞️ Lagos</span>
+            </label>
+            <label class="filtro-checkbox">
+                <input type="checkbox" id="filtro-presas" checked onchange="aplicarFiltros()">
+                <span class="checkmark tipo-presa">🏗️ Presas</span>
+            </label>
+            <label class="filtro-checkbox">
+                <input type="checkbox" id="filtro-manantiales" checked onchange="aplicarFiltros()">
+                <span class="checkmark tipo-manantial">💧 Manantiales</span>
+            </label>
+        </div>
+        
+        <!-- Información básica (solo para usuarios) -->
+        <% if (!isAdmin) { %>
+        <div class="info-panel">
+            <h4>ℹ️ Información</h4>
+            <p class="info-text">
+                Explora los cuerpos de agua del estado de Hidalgo. 
+                Haz clic en cualquier marcador para ver más detalles.
+            </p>
+            <div class="estadisticas-simples">
+                <div class="stat-simple">
+                    <span class="stat-icon">📍</span>
+                    <span id="total-pines-user" class="stat-number">0</span>
+                    <span class="stat-text">Puntos</span>
+                </div>
+            </div>
+        </div>
+        <% } %>
+    </div>
+
+    <!-- Contenedor del mapa de Google Maps -->
+    <div id="google-map" class="google-map <%= isAdmin ? 'admin-map' : 'user-map' %>"></div>
+    
+    <!-- Loading indicator -->
+    <div id="loading" class="loading">
+        <div class="loading-spinner"></div>
+        <p>Cargando mapa de ecosistemas acuáticos...</p>
+    </div>
+</div>
+
+<!-- Panel de detalles deslizable -->
+<div id="detalles-container" class="detalles-container <%= isAdmin ? 'admin-details' : 'user-details' %>">
+    <div id="detalles-content" class="detalles-content">
+        <!-- El contenido se llenará dinámicamente -->
+    </div>
+</div>
 
 <script src="/js/mapa_googlemaps.js"></script>
+
+<style>
+/* Estilos base del mapa */
+.mapa-container {
+    position: relative;
+    height: 100vh;
+}
+
+.google-map {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+/* Estilos específicos para la vista de administrador */
+.admin-view {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 10px;
+}
+
+.admin-panel {
+    background: #2c3e50;
+    color: white;
+    padding: 20px;
+    overflow-y: auto;
+    border-radius: 0 10px 10px 0;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+}
+
+.admin-panel h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #ecf0f1;
+    border-bottom: 2px solid #34495e;
+    padding-bottom: 10px;
+}
+
+.control-group {
+    margin-bottom: 25px;
+    padding: 15px;
+    background: #34495e;
+    border-radius: 8px;
+}
+
+.control-group h4 {
+    margin: 0 0 15px 0;
+    color: #ecf0f1;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.admin-controls .btn {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: #3498db;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: #95a5a6;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #7f8c8d;
+    transform: translateY(-2px);
+}
+
+.btn-warning {
+    background: #f39c12;
+    color: white;
+}
+
+.btn-warning:hover {
+    background: #e67e22;
+    transform: translateY(-2px);
+}
+
+.admin-filters {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(44, 62, 80, 0.95);
+    color: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    z-index: 1000;
+    max-width: 200px;
+}
+
+.admin-filters h3 {
+    margin: 0 0 15px 0;
+    font-size: 1rem;
+    text-align: center;
+    border-bottom: 1px solid #34495e;
+    padding-bottom: 8px;
+}
+
+/* Estilos específicos para la vista de usuario */
+.user-view {
+    position: relative;
+}
+
+.user-filters {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    z-index: 1000;
+    max-width: 250px;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.user-filters h3 {
+    margin: 0 0 15px 0;
+    color: #2c3e50;
+    font-size: 1.1rem;
+    text-align: center;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 8px;
+}
+
+/* Estilos comunes para filtros */
+.filtros-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.filtro-checkbox {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.admin-filters .filtro-checkbox:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+.user-filters .filtro-checkbox {
+    background: rgba(255,255,255,0.5);
+}
+
+.user-filters .filtro-checkbox:hover {
+    background: rgba(52, 152, 219, 0.1);
+    transform: translateX(3px);
+}
+
+.filtro-checkbox input[type="checkbox"] {
+    margin-right: 10px;
+    transform: scale(1.1);
+}
+
+/* Estadísticas */
+.estadisticas-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 5px;
+}
+
+.stat-label {
+    color: #bdc3c7;
+    font-size: 0.9rem;
+}
+
+.stat-value {
+    color: #ecf0f1;
+    font-weight: bold;
+}
+
+/* Info panel para usuarios */
+.info-panel {
+    border-top: 1px solid #ecf0f1;
+    padding-top: 15px;
+    margin-top: 15px;
+}
+
+.info-panel h4 {
+    margin: 0 0 10px 0;
+    color: #2c3e50;
+    font-size: 0.95rem;
+}
+
+.info-text {
+    font-size: 0.85rem;
+    color: #7f8c8d;
+    line-height: 1.4;
+    margin-bottom: 15px;
+}
+
+.estadisticas-simples {
+    display: flex;
+    justify-content: center;
+}
+
+.stat-simple {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    border-radius: 8px;
+    color: white;
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+}
+
+.stat-icon {
+    font-size: 1.2rem;
+    margin-bottom: 5px;
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+
+.stat-text {
+    font-size: 0.8rem;
+    opacity: 0.9;
+}
+
+/* Panel de detalles */
+.detalles-container {
+    background: #ffffff;
+    border-left: 3px solid #3498db;
+}
+
+.admin-details {
+    background: #ecf0f1;
+}
+
+.user-details .detalle-acciones {
+    display: none; /* Ocultar botones de edición para usuarios */
+}
+
+/* Loading */
+.loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 1000;
+    background: rgba(255,255,255,0.9);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 10px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .admin-view {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+    }
+    
+    .admin-panel {
+        max-height: 300px;
+        border-radius: 10px 10px 0 0;
+    }
+    
+    .user-filters, .admin-filters {
+        position: static;
+        margin: 10px;
+        max-width: none;
+    }
+}
+</style>

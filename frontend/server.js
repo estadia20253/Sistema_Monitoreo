@@ -57,34 +57,63 @@ app.get('/', (req, res) => {
     });
 });
 
-// Ruta del s (requiere autenticación)
-app.get('/mapa', async (req, res) => {
-    // Verificar que el usuario esté autenticado
+// Middleware para verificar autenticación
+function requireAuth(req, res, next) {
     if (!req.session.user) {
-        return res.redirect('/login?error=Debes iniciar sesión para acceder al mapa');
+        return res.redirect('/login?error=Debes iniciar sesión para acceder a esta página');
     }
-    
+    next();
+}
+
+// Middleware para verificar rol de administrador
+function requireAdmin(req, res, next) {
+    if (!req.session.user) {
+        return res.redirect('/login?error=Debes iniciar sesión para acceder a esta página');
+    }
+    if (req.session.user.role !== 'admin') {
+        return res.redirect('/mapa?error=No tienes permisos de administrador');
+    }
+    next();
+}
+
+// Ruta del mapa (requiere autenticación y diferencia por roles)
+app.get('/mapa', requireAuth, async (req, res) => {
     try {
         // Verificar conexión con el backend
         const backendStatus = await verificarBackend();
         
+        // Determinar configuración según el rol del usuario
+        const isAdmin = req.session.user.role === 'admin';
+        const pageTitle = isAdmin ? 'Panel de Administrador - EcoMonitor' : 'Mapa - Ecosistemas Acuáticos';
+        
         res.render('layout', { 
-            title: 'Mapa - EcoMonitor Acuático',
-            pageTitle: 'Mapa',
+            title: pageTitle,
+            pageTitle: pageTitle,
             backendConnected: backendStatus,
-            user: req.session.user || null,
+            user: req.session.user,
+            isAdmin: isAdmin,
             pageView: 'mapa'
         });
     } catch (error) {
+        const isAdmin = req.session.user.role === 'admin';
+        const pageTitle = isAdmin ? 'Panel de Administrador - EcoMonitor' : 'Mapa - Ecosistemas Acuáticos';
+        
         res.render('layout', { 
-            title: 'Mapa - EcoMonitor Acuático',
-            pageTitle: 'Mapa',
+            title: pageTitle,
+            pageTitle: pageTitle,
             backendConnected: false,
             error: 'Error de conexión con el backend',
-            user: req.session.user || null,
+            user: req.session.user,
+            isAdmin: isAdmin,
             pageView: 'mapa'
         });
     }
+});
+
+// Ruta específica para administradores (opcional, acceso directo)
+app.get('/admin', requireAdmin, async (req, res) => {
+    // Redirigir a /mapa ya que ahora es una vista unificada
+    res.redirect('/mapa');
 });
 
 // Formularios de autenticación
@@ -162,8 +191,10 @@ app.post('/login', async (req, res) => {
             // Crear sesión con información del usuario
             req.session.user = user.toSessionData();
 
-            console.log(`Usuario ${user.getFullName()} (${user.email}) ha iniciado sesión`);
-            return res.redirect('/');
+            console.log(`Usuario ${user.getFullName()} (${user.email}) ha iniciado sesión con rol: ${user.role}`);
+            
+            // Redirigir al mapa (que ahora se adapta según el rol)
+            return res.redirect('/mapa');
         }
 
         res.render('layout', {

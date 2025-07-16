@@ -1,87 +1,303 @@
-Se agrego la api de Google Maps, elimine los pines de la base de datos para crearlos nuevamente (aun no los creo), los pines que se deben de Agregan seran los siguientes:
+# Sistema de Monitoreo de Ecosistemas Acuáticos - Hidalgo
 
-Ríos:
+Sistema web interactivo para la visualización, gestión y monitoreo de ecosistemas acuáticos del estado de Hidalgo, México.
 
-Río Moctezuma: 21°58′03″N, 98°33′47″O (Confluencia con el Río Tula en la Presa Zimapán)    
+## 🌊 Características Principales
 
-Río Tula: 20°35′02″N, 99°19′43″O (Paso por Tula de Allende)    
+- **🗺️ Mapa Interactivo**: Visualización de ríos, lagos y presas sobre mapa geográfico
+- **📍 Gestión de Pines**: Agregar, eliminar y reposicionar puntos de ecosistemas
+- **🔍 Filtros Dinámicos**: Mostrar/ocultar ecosistemas por tipo
+- **👤 Sistema de Usuarios**: Autenticación completa con PostgreSQL
+- **📱 Responsive**: Funciona en móviles y escritorio
+- **🎨 Interfaz Moderna**: Tooltips, animaciones y efectos visuales
 
-Río Amajac: 21°15′08″N, 98°46′53″O (Nacimiento en la Sierra de Pachuca)    
+## 🚀 Funcionalidades Implementadas
 
-Río San Juan: 20°32′31″N, 99°51′27″O (Confluencia con el Río Tula, límite con Querétaro)    
+### Gestión de Pines
+- ✅ **Agregar nuevos pines** sin coordenadas automáticas
+- ✅ **Eliminar pines existentes** con confirmación doble
+- ✅ **Editar posiciones** mediante clic en el mapa
+- ✅ **Filtros por tipo** (ríos, lagos, presas)
+- ✅ **Tooltips informativos** solo al hover
 
-Río Salado: 20°08′27″N, 99°14′54″O (Desembocadura en el Río Tula)    
+### Sistema de Usuarios
+- ✅ Registro y login seguro
+- ✅ Recuperación de contraseña con preguntas secretas
+- ✅ Sesiones persistentes
+- ✅ Validación completa de formularios
 
-Río Actopan: 20°16′12″N, 98°56′42″O (Punto de interés en Puente de Dios, Mesa Chica)    
+## 📁 Estructura del Proyecto
 
-Río Tecolutla: Rango de coordenadas para su paso por Hidalgo: Latitud 19°27'36''N a 20°28'48''N, Longitud 96°57'00''O a 98°14'24''O    
+```
+Sistema_de_Monitoreo_web/
+├── backend/                    # API Python Flask
+│   ├── app.py                 # Servidor principal
+│   ├── requirements.txt       # Dependencias Python
+│   ├── static/               # Mapa base de Hidalgo
+│   └── data/                 # Datos de pines (excluido en .gitignore)
+├── frontend/                  # Aplicación Node.js/Express
+│   ├── server.js             # Servidor web
+│   ├── package.json          # Dependencias Node.js
+│   ├── config/               # Configuración BD
+│   ├── models/               # Modelos de usuario
+│   ├── views/                # Plantillas EJS
+│   └── public/               # CSS, JavaScript, assets
+└── README.md
+```
 
-Río Cazones: 20°43′30″N, 97°12′01″O (Origen en la sierra de Hidalgo, al este de Tulancingo)    
+## ⚙️ Requisitos del Sistema
 
-Río Pantepec: 20°56′00″N, 97°44′00″O (Nacimiento en la Sierra Madre Oriental)    
+- **Node.js** 16.0 o superior
+- **Python** 3.8 o superior  
+- **PostgreSQL** 12 o superior
+- **npm** o **yarn**
+- **pip** (Python package manager)
 
-Río Chicavasco: 20°30′22″N, 99°14′05″O (Nacimiento en la Sierra de Pachuca)    
+## 🛠️ Instalación y Configuración
 
-Río Metztitlán: 20°35′04″N, 98°45′47″O (Punto de interés en la Barranca de Metztitlán)    
+### 1. Clonar el Repositorio
+```bash
+git clone https://github.com/AlanGomez0605/Sistema_de_Monitoreo_web.git
+cd Sistema_de_Monitoreo_web
+```
 
-Río Tulancingo (Río Grande de Tulancingo): Rango de coordenadas para la cuenca: Latitud 19°55´N a 20°19'N, Longitud 98°10'O a 98°33'O    
+### 2. Configurar Base de Datos PostgreSQL
 
-Río de las Avenidas: 20°06′53.55″N, 98°44′22.68″O (Punto representativo en Pachuca)    
+```sql
+-- Conectar a PostgreSQL como superusuario
+psql -U postgres
 
-Río Alfajayucan: 20°29′30″N, 99°23′15″O    
+-- Crear base de datos
+CREATE DATABASE ecomonitor_db;
 
-Río Tepeji: 19°45′37″N, 99°29′21″O    
+-- Crear usuario (opcional)
+CREATE USER ecomonitor WITH PASSWORD 'tu_password_seguro';
+GRANT ALL PRIVILEGES ON DATABASE ecomonitor_db TO ecomonitor;
 
-Río Rosas: 20°02′18″N, 99°27′02″O    
+-- Salir
+\q
+```
 
-Río El Salto: 19°56′12″N, 99°16′58″O    
+### 3. Configurar Backend (Python Flask)
 
-Río Cuautitlán: 19°35′36″N, 99°26′19″O    
+```bash
+# Navegar al directorio backend
+cd backend
 
-Río Tlautla: 19°57′45″N, 99°23′06″O    
+# Crear entorno virtual (recomendado)
+python -m venv venv
 
-Río Calabozo: 21°1′51″N, 98°17′6″W (Coordenadas de la comunidad de Coatzonco, Huautla, Hidalgo, donde se encuentra una sección del río)    
+# Activar entorno virtual
+# En Windows:
+venv\Scripts\activate
+# En Linux/Mac:
+source venv/bin/activate
 
-Lagos y Lagunas:
+# Instalar dependencias
+pip install -r requirements.txt
 
-Laguna de Metztitlán: Latitud 20°40′N a 20°42′N, Longitud 98°50′O a 98°53′O    
+# Ejecutar servidor
+python app.py
+```
 
-Laguna de Tecocomulco: Latitud 19°50′08″N a 19°53′20″N, Longitud 98°21′54″O a 98°25′44″O    
+**El backend se ejecutará en:** `http://localhost:5000`
 
-Laguna de Zupitlán: No se encontraron coordenadas específicas para la laguna en los datos proporcionados, pero se menciona en el municipio de Acatlán.   
+### 4. Configurar Frontend (Node.js/Express)
 
-Presas:
+```bash
+# Navegar al directorio frontend
+cd frontend
 
-Presa Requena: 19°56′41″N, 99°19′10″O    
+# Instalar dependencias
+npm install
 
-Presa Endhó: 20°08′10″N, 99°22′16″O    
+# Crear archivo de variables de entorno
+cp .env.example .env
+```
 
-Presa La Esperanza: 20°06´24.290″N, 98°08´58.761″O    
+### 5. Configurar Variables de Entorno
 
-Presa El Girón: No se encontraron coordenadas específicas para esta presa en los datos proporcionados.   
+Crear archivo `.env` en `frontend/` con el siguiente contenido:
 
-Presa El Cedral: 20°10′58″N, 98°44′46″O    
+```env
+# Configuración del servidor
+NODE_ENV=development
+PORT=3000
 
-Presa Javier Rojo Gómez (La Peña): 20°21′24″N, 99°19′22″O    
+# Configuración de PostgreSQL
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=ecomonitor_db
+DB_USER=postgres
+DB_PASSWORD=tu_password_postgresql
 
-Presa Vicente Aguirre (Las Golondrinas): 20.43194°N, -99.36778°O    
+# URL del backend
+BACKEND_URL=http://localhost:5000
 
-Presa Zimapán (Ingeniero Fernando Hiriart Balderrama): 21°58′03″N, 98°33′47″O (Coordenadas del punto donde el Río Moctezuma nace de la presa)    
+# Credenciales de administrador
+ADMIN_USER=admin@sistema.com
+ADMIN_PASS=admin123
 
-Presa Los Ángeles: No se encontraron coordenadas directas para la presa, pero se menciona una localidad llamada "Presas" en Tezontepec de Aldama con coordenadas 20°09′34″N, 99°15′09″O.   
+# Secreto para sesiones (cambiar en producción)
+SESSION_SECRET=mi_secreto_super_seguro_para_sesiones_2024
+```
 
-Otros Cuerpos Acuáticos:
+### 6. Crear Archivo de Datos (Requerido)
 
-Grutas de Tolantongo: 20°39′01″N, 98°59′58″O    
+Como `backend/data/pines.json` está excluido del repositorio, crear manualmente:
 
-Río Tolantongo (asociado a grutas): 20°40′20″N, 98°56′10″O    
+```bash
+# Crear directorio
+mkdir backend/data
 
-Manantial de Pathe: 20°34'40.2”N, 99°41'34.4”W    
+# Crear archivo con datos iniciales
+echo '[
+  {
+    "id": 1,
+    "nombre": "Río Moctezuma",
+    "tipo": "rio", 
+    "x": 45.5,
+    "y": 30.2,
+    "descripcion": "Río principal del estado de Hidalgo"
+  },
+  {
+    "id": 2,
+    "nombre": "Lago Metztitlán", 
+    "tipo": "lago",
+    "x": 55.8,
+    "y": 25.4,
+    "descripcion": "Importante cuerpo de agua en la región"
+  }
+]' > backend/data/pines.json
+```
 
-Manantial de Vito: 19°59′33″N, 99°12′04″O    
+### 7. Ejecutar la Aplicación
 
-Manantial de Dios Padre: 20°27′50″N, 99°11′50″O    
+```bash
+# Terminal 1: Backend
+cd backend
+python app.py
 
-Manantial de Ajacuba: 20°05′40″N, 99°07′28″O    
+# Terminal 2: Frontend
+cd frontend
+npm start
+```
 
-Manantial de Amajac (Santa María Amajac): 20°06′50″N, 98°44′50″O 
+**Acceder a la aplicación:** `http://localhost:3000`
+
+## 🔑 Credenciales por Defecto
+
+- **Usuario**: `admin@sistema.com`
+- **Contraseña**: `admin123`
+
+## 🎮 Guía de Uso
+
+### Agregar Nuevos Pines
+1. Click en **"➕ Agregar Pin"**
+2. Completar formulario (nombre, tipo, descripción)
+3. El pin se crea SIN coordenadas
+4. Usar **"Editar Posiciones"** para ubicarlo en el mapa
+
+### Eliminar Pines
+1. Click en **"🗑️ Eliminar Pin"**
+2. Seleccionar pin de la lista
+3. Confirmar eliminación (doble confirmación)
+
+### Filtrar Ecosistemas
+- Usar checkboxes para mostrar/ocultar tipos
+- Filtros: Ríos, Lagos, Presas
+- Botón "Resetear Filtros" para mostrar todos
+
+### Reposicionar Pines
+1. Click en **"Editar Posiciones"**
+2. Seleccionar pin de la lista lateral
+3. Click en nueva ubicación en el mapa
+4. Guardar cambios
+
+## 🛡️ Archivos No Incluidos (.gitignore)
+
+Por seguridad y buenas prácticas, estos archivos NO se suben al repositorio:
+
+- `frontend/.env` - Variables de entorno y credenciales
+- `frontend/node_modules/` - Dependencias de Node.js
+- `backend/__pycache__/` - Cache de Python
+- `backend/venv/` - Entorno virtual de Python
+- `backend/data/pines.json` - Datos dinámicos de pines
+
+## 🔧 Tecnologías Utilizadas
+
+### Backend
+- **Python 3.8+**
+- **Flask** - Framework web
+- **Flask-CORS** - Manejo de CORS
+- **JSON** - Almacenamiento de datos de pines
+
+### Frontend  
+- **Node.js 16+**
+- **Express** - Servidor web
+- **EJS** - Motor de plantillas
+- **PostgreSQL** - Base de datos de usuarios
+- **bcryptjs** - Encriptación de contraseñas
+- **express-session** - Manejo de sesiones
+
+### Cliente
+- **JavaScript ES6+** - Lógica del mapa
+- **CSS3** - Estilos y animaciones
+- **HTML5** - Estructura responsiva
+
+## 📝 Notas de Desarrollo
+
+### Puertos por Defecto
+- **Frontend**: Puerto 3000
+- **Backend**: Puerto 5000
+- **PostgreSQL**: Puerto 5432
+
+### Base de Datos
+- La base de datos `ecomonitor_db` se crea automáticamente al primera ejecución
+- Las tablas de usuarios se generan automáticamente
+- Los datos de pines se almacenan en archivo JSON
+
+### Seguridad
+- Contraseñas encriptadas con bcrypt
+- Sesiones seguras con express-session
+- Validación de entrada en formularios
+- Protección CORS configurada
+
+## 🐛 Resolución de Problemas
+
+### Error de Conexión a PostgreSQL
+```bash
+# Verificar que PostgreSQL esté ejecutándose
+sudo service postgresql status
+
+# Verificar credenciales en .env
+cat frontend/.env
+```
+
+### Error "Puerto ya en uso"
+```bash
+# Terminar procesos en puertos 3000 y 5000
+npx kill-port 3000
+npx kill-port 5000
+```
+
+### Pines no aparecen en el mapa
+- Verificar que existe `backend/data/pines.json`
+- Verificar que el backend esté ejecutándose
+- Revisar consola del navegador para errores
+
+## 🤝 Contribuir
+
+1. Fork del proyecto
+2. Crear rama para nueva funcionalidad
+3. Commit de cambios
+4. Push a la rama
+5. Abrir Pull Request
+
+## 📄 Licencia
+
+Este proyecto está bajo la Licencia MIT - ver el archivo LICENSE para detalles.
+
+---
+
+**Desarrollado para el monitoreo de ecosistemas acuáticos del estado de Hidalgo, México 🇲🇽**
