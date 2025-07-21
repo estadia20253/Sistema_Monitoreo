@@ -537,11 +537,43 @@ function mostrarDetallesPin(pin) {
 
 // Función para actualizar el panel de detalles
 function actualizarPanelDetalles(pin) {
+    console.log('🔍 Actualizando panel de detalles para pin:', pin);
+    
     const detallesContent = document.getElementById('detalles-content');
     if (!detallesContent) {
         console.error('No se encontró el contenedor de detalles.');
         return;
     }
+    
+    // Determinar si el usuario es admin (verificando si existe el panel de admin)
+    const isAdmin = document.querySelector('.admin-panel') !== null;
+    console.log('👑 Usuario es admin:', isAdmin);
+    console.log('🆔 Pin ID:', pin.id);
+    console.log('🆔 Pin temporal_id:', pin.temporal_id);
+    
+    // Panel de imágenes para admin
+    const adminImagePanel = isAdmin ? `
+        <div class="admin-imagenes-panel" style="margin-top:20px; padding: 15px; border: 2px solid #3498db; border-radius: 8px; background-color: #f8f9fa;">
+            <h4>📷 Subir imagen para análisis de <strong>${pin.nombre}</strong></h4>
+            <form id="form-subir-imagen" enctype="multipart/form-data">
+                <input type="file" name="imagen" accept="image/*" required style="margin-bottom: 10px;">
+                <input type="hidden" name="pin_id" value="${pin.id || pin.temporal_id || ''}">
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Subir imagen</button>
+            </form>
+            <div id="imagenes-analisis" style="margin-top: 15px;"></div>
+        </div>
+    ` : '';
+
+    // Panel de imágenes para usuario regular
+    const userImagePanel = !isAdmin ? `
+        <div class="user-imagenes-panel" style="margin-top:20px; padding: 15px; border: 2px solid #27ae60; border-radius: 8px; background-color: #f8f9fa;">
+            <h4>📷 Imágenes del ecosistema <strong>${pin.nombre}</strong></h4>
+            <div id="imagenes-usuario"></div>
+        </div>
+    ` : '';
+    
+    console.log('📝 Generando HTML para panel admin:', !!adminImagePanel);
+    console.log('📝 Generando HTML para panel usuario:', !!userImagePanel);
     
     detallesContent.innerHTML = `
         <div class="detalle-header">
@@ -567,8 +599,57 @@ function actualizarPanelDetalles(pin) {
                     <p>Este pin no se ha guardado permanentemente. Usa "Guardar Cambios" para conservarlo.</p>
                 </div>
             ` : ''}
+            ${adminImagePanel}
+            ${userImagePanel}
         </div>
     `;
+    
+    // Configurar eventos para el formulario de subida de imágenes si es admin
+    if (isAdmin) {
+        const form = document.getElementById('form-subir-imagen');
+        if (form) {
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const formData = new FormData(form);
+                
+                // Si no hay pin.id, usar temporal_id o generar uno
+                if (!formData.get('pin_id') || formData.get('pin_id') === '') {
+                    formData.set('pin_id', pin.temporal_id || 'temp_' + Date.now());
+                }
+                
+                try {
+                    const res = await fetch('/api/imagenes', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await res.json();
+                    
+                    if (data.url) {
+                        alert(`Imagen subida y analizada correctamente para ${pin.nombre}`);
+                        if (pin.id) {
+                            cargarImagenesAnalisis(pin.id);
+                        }
+                        form.reset(); // Limpiar el formulario
+                    } else {
+                        alert('Error al subir imagen: ' + (data.error || 'Error desconocido'));
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Error al subir imagen: ' + error.message);
+                }
+            });
+            
+            // Cargar imágenes existentes para este pin si tiene ID
+            if (pin.id) {
+                cargarImagenesAnalisis(pin.id);
+            }
+        }
+    }
+    
+    // Para usuarios regulares, cargar imágenes de solo lectura
+    if (!isAdmin && pin.id) {
+        cargarImagenesUsuario(pin.id);
+    }
 }
 
 // Función para cerrar detalles
@@ -621,8 +702,7 @@ function aplicarFiltros() {
 
 // Función para mostrar botón agregar pin
 function mostrarBotonAgregarPin() {
-    // Esta función se puede implementar más tarde
-    console.log('Función mostrarBotonAgregarPin llamada');
+    // Implementación futura para mostrar controles adicionales de admin
 }
 
 // Función para mostrar instrucciones de edición
@@ -686,7 +766,7 @@ function mostrarMensajeConfirmacion(mensaje, tipo = 'info') {
 
 // Función para actualizar lista de pines (placeholder)
 function actualizarListaPines() {
-    console.log('Función actualizarListaPines llamada');
+    // Implementación futura para sincronizar lista de pines en UI
 }
 
 // Función para guardar nueva posición de pin
@@ -900,100 +980,9 @@ function aplicarFiltros() {
     });
 }
 
-// Función para mostrar botón agregar pin (placeholder)
-function mostrarBotonAgregarPin() {
-    const botonAgregar = document.getElementById('btn-agregar-pin');
-    if (botonAgregar) {
-        botonAgregar.style.display = 'block';
-    }
-}
+// Funciones duplicadas eliminadas - se mantienen las versiones originales más arriba
 
-// Función para mostrar mensaje de confirmación (placeholder)
-function mostrarMensajeConfirmacion(mensaje, tipo) {
-    console.log(`${tipo}: ${mensaje}`);
-    
-    // Crear o actualizar el elemento de mensaje
-    let mensajeElement = document.getElementById('mensaje-confirmacion');
-    if (!mensajeElement) {
-        mensajeElement = document.createElement('div');
-        mensajeElement.id = 'mensaje-confirmacion';
-        mensajeElement.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 20px;
-            border-radius: 5px;
-            color: white;
-            font-weight: bold;
-            z-index: 1000;
-            max-width: 300px;
-        `;
-        document.body.appendChild(mensajeElement);
-    }
-    
-    // Definir colores según el tipo
-    const colores = {
-        'temporal': '#f39c12',
-        'agregar': '#27ae60',
-        'error': '#e74c3c',
-        'info': '#3498db'
-    };
-    
-    mensajeElement.style.backgroundColor = colores[tipo] || '#95a5a6';
-    mensajeElement.textContent = mensaje;
-    mensajeElement.style.display = 'block';
-    
-    // Auto-ocultar después de 5 segundos
-    setTimeout(() => {
-        if (mensajeElement) {
-            mensajeElement.style.display = 'none';
-        }
-    }, 5000);
-}
-
-// Función para actualizar lista de pines (placeholder)
-function actualizarListaPines() {
-    console.log('Actualizando lista de pines...');
-    // Esta función podría actualizar una lista lateral de pines si existe
-}
-
-// Función para mostrar instrucciones de edición
-function mostrarInstruccionesEdicion() {
-    let instrucciones = document.getElementById('instrucciones-edicion');
-    if (!instrucciones) {
-        instrucciones = document.createElement('div');
-        instrucciones.id = 'instrucciones-edicion';
-        instrucciones.style.cssText = `
-            position: fixed;
-            top: 80px;
-            left: 20px;
-            background: rgba(52, 152, 219, 0.9);
-            color: white;
-            padding: 15px;
-            border-radius: 5px;
-            z-index: 1000;
-            max-width: 250px;
-            font-size: 14px;
-        `;
-        document.body.appendChild(instrucciones);
-    }
-    
-    instrucciones.innerHTML = `
-        <h4 style="margin: 0 0 10px 0;">🎯 Modo Edición Activo</h4>
-        <p style="margin: 5px 0;">• Clic derecho en un pin para seleccionarlo</p>
-        <p style="margin: 5px 0;">• Clic izquierdo en el mapa para reposicionarlo</p>
-        <p style="margin: 5px 0;">• Usa "Salir del Modo Edición" cuando termines</p>
-    `;
-    instrucciones.style.display = 'block';
-}
-
-// Función para ocultar instrucciones de edición
-function ocultarInstruccionesEdicion() {
-    const instrucciones = document.getElementById('instrucciones-edicion');
-    if (instrucciones) {
-        instrucciones.style.display = 'none';
-    }
-}
+// Funciones duplicadas eliminadas - se mantienen las versiones originales más arriba
 
 // Función para guardar nueva posición de pin en la base de datos
 async function guardarNuevaPosicionPin(pin, latitud, longitud) {
@@ -1450,4 +1439,80 @@ function habilitarModoAgregarPin() {
             }
         }
     });
+}
+
+// Función para cargar imágenes y análisis (admin)
+async function cargarImagenesAnalisis(pinId) {
+    try {
+        const res = await fetch(`/api/imagenes/${pinId}`);
+        const imagenes = await res.json();
+        const cont = document.getElementById('imagenes-analisis');
+        
+        if (cont) {
+            if (imagenes && imagenes.length > 0) {
+                cont.innerHTML = imagenes.map(img => `
+                    <div style="margin-bottom:15px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; background-color: white;">
+                        <img src="${img.url}" style="max-width:100%; height: auto; border-radius: 5px;" alt="Imagen de análisis">
+                        <div style="margin-top: 8px;">
+                            <div><strong>🌊 Porcentaje agua:</strong> ${img.porcentaje_agua ? img.porcentaje_agua.toFixed(2) : 'N/A'}%</div>
+                            <div><strong>🔬 Contaminación:</strong> ${img.contaminacion_detectada || 'N/A'}</div>
+                            <div><strong>📅 Fecha:</strong> ${new Date(img.fecha_subida).toLocaleDateString()}</div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                // Mensaje de cambio de nivel de agua si hay más de una imagen
+                if (imagenes.length >= 2) {
+                    const cambio = imagenes[0].porcentaje_agua - imagenes[1].porcentaje_agua;
+                    const cambioHTML = `
+                        <div style="padding: 10px; background-color: ${cambio > 0 ? '#d4edda' : '#f8d7da'}; border-radius: 5px; margin-top: 10px;">
+                            <strong>📊 Análisis temporal:</strong> 
+                            ${cambio > 0 ? 'Aumento' : 'Disminución'} de ${Math.abs(cambio).toFixed(2)}% en el nivel de agua
+                        </div>
+                    `;
+                    cont.innerHTML += cambioHTML;
+                }
+            } else {
+                cont.innerHTML = '<p style="color: #666; font-style: italic;">No hay imágenes disponibles para este pin.</p>';
+            }
+        }
+    } catch (error) {
+        console.error('Error al cargar imágenes:', error);
+        const cont = document.getElementById('imagenes-analisis');
+        if (cont) {
+            cont.innerHTML = '<p style="color: #e74c3c;">Error al cargar las imágenes.</p>';
+        }
+    }
+}
+
+// Función para cargar imágenes (usuario regular - solo lectura)
+async function cargarImagenesUsuario(pinId) {
+    try {
+        const res = await fetch(`/api/imagenes/${pinId}`);
+        const imagenes = await res.json();
+        const cont = document.getElementById('imagenes-usuario');
+        
+        if (cont) {
+            if (imagenes && imagenes.length > 0) {
+                cont.innerHTML = imagenes.map(img => `
+                    <div style="margin-bottom:15px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; background-color: white;">
+                        <img src="${img.url}" style="max-width:100%; height: auto; border-radius: 5px;" alt="Imagen del ecosistema">
+                        <div style="margin-top: 8px;">
+                            <div><strong>🌊 Nivel de agua:</strong> ${img.porcentaje_agua ? img.porcentaje_agua.toFixed(2) : 'N/A'}%</div>
+                            <div><strong>🔬 Estado:</strong> ${img.contaminacion_detectada || 'N/A'}</div>
+                            <div><strong>📅 Fecha:</strong> ${new Date(img.fecha_subida).toLocaleDateString()}</div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                cont.innerHTML = '<p style="color: #666; font-style: italic;">No hay imágenes disponibles para este ecosistema.</p>';
+            }
+        }
+    } catch (error) {
+        console.error('Error al cargar imágenes:', error);
+        const cont = document.getElementById('imagenes-usuario');
+        if (cont) {
+            cont.innerHTML = '<p style="color: #e74c3c;">Error al cargar las imágenes.</p>';
+        }
+    }
 }

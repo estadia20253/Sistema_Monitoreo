@@ -2,9 +2,61 @@ from flask import Flask, render_template, send_file, jsonify, request
 from flask_cors import CORS
 import os
 import json
+from routes_imagenes import imagenes_bp
+import psycopg2
+from dotenv import load_dotenv
 
 app = Flask(__name__)
 CORS(app)  # Permitir solicitudes desde el frontend
+
+# Cargar variables de entorno desde el archivo .env
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', 'frontend', '.env'))
+
+# Inicializar modelos y base de datos
+try:
+    from models import conn
+    print("✅ Conexión a PostgreSQL establecida correctamente")
+    
+    # Migrar datos del archivo JSON a PostgreSQL si la tabla está vacía
+    def migrar_datos_json_a_postgresql():
+        try:
+            cursor = conn.cursor()
+            cursor.execute("SELECT COUNT(*) FROM pines")
+            count = cursor.fetchone()[0]
+            
+            if count == 0 and os.path.exists(PINES_FILE):
+                print("📦 Migrando datos del archivo JSON a PostgreSQL...")
+                with open(PINES_FILE, 'r') as f:
+                    pines_json = json.load(f)
+                
+                for pin in pines_json:
+                    cursor.execute('''
+                        INSERT INTO pines (nombre, tipo, descripcion, latitud, longitud, x, y, activo)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                    ''', (
+                        pin.get('nombre', ''),
+                        pin.get('tipo', 'rio'),
+                        pin.get('descripcion', ''),
+                        pin.get('latitud'),
+                        pin.get('longitud'),
+                        pin.get('x'),
+                        pin.get('y'),
+                        pin.get('activo', True)
+                    ))
+                
+                conn.commit()
+                print(f"✅ {len(pines_json)} pines migrados exitosamente a PostgreSQL")
+            else:
+                print(f"📊 PostgreSQL ya contiene {count} pines")
+                
+        except Exception as e:
+            print(f"⚠️ Error en migración: {e}")
+    
+    migrar_datos_json_a_postgresql()
+    
+except Exception as e:
+    print(f"⚠️ Error conectando a PostgreSQL: {e}")
+    print("El sistema usará archivos JSON como fallback")
 
 # Archivo para almacenar los pines
 PINES_FILE = os.path.join(os.path.dirname(__file__), 'data', 'pines.json')
@@ -49,6 +101,28 @@ if not os.path.exists(PINES_FILE):
     with open(PINES_FILE, 'w') as f:
         json.dump(pines_hidalgo, f, indent=2)
 
+# Crear tabla de imágenes si no existe
+try:
+    conn = psycopg2.connect(
+        host=os.getenv('DB_HOST', 'localhost'),
+        dbname=os.getenv('DB_NAME', 'ecomonitor_db'),  # Corregido: usar el nombre del .env
+        user=os.getenv('DB_USER', 'postgres'),
+        password=os.getenv('DB_PASSWORD', 'postgres')  # Corregido: usar DB_PASSWORD del .env
+    )
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS imagenes (
+            id SERIAL PRIMARY KEY,
+            pin_id INTEGER REFERENCES pines(id),
+            url TEXT NOT NULL,
+            fecha_subida TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            descripcion TEXT
+        );
+    ''')
+    conn.commit()
+except Exception as e:
+    print(f"Error creando tabla imagenes: {e}")
+
 # Ruta principal del backend
 @app.route('/')
 def home():
@@ -80,14 +154,45 @@ def obtener_mapa():
 @app.route('/api/pines', methods=['GET'])
 def obtener_pines():
     try:
-        print("Obteniendo pines...")
-        with open(PINES_FILE, 'r') as f:
-            pines = json.load(f)
-        print(f"Pines encontrados: {len(pines)}")
+        print("Obteniendo pines desde PostgreSQL...")
+        
+        # Importar conexión a la base de datos
+        from models import conn
+        cursor = conn.cursor()
+        
+        cursor.execute("SELECT id, nombre, tipo, descripcion, latitud, longitud, x, y, activo FROM pines WHERE activo = TRUE")
+        resultados = cursor.fetchall()
+        
+        pines = []
+        for row in resultados:
+            pin = {
+                'id': row[0],
+                'nombre': row[1],
+                'tipo': row[2],
+                'descripcion': row[3],
+                'latitud': row[4],
+                'longitud': row[5],
+                'x': row[6],
+                'y': row[7],
+                'activo': row[8]
+            }
+            pines.append(pin)
+        
+        print(f"Pines encontrados en PostgreSQL: {len(pines)}")
         return jsonify(pines)
+        
     except Exception as e:
-        print(f"Error al obtener pines: {str(e)}")
-        return jsonify({"error": str(e)}), 500
+        print(f"Error al obtener pines desde PostgreSQL: {str(e)}")
+        # Fallback a archivo JSON si la base de datos falla
+        try:
+            print("Intentando fallback a archivo JSON...")
+            with open(PINES_FILE, 'r') as f:
+                pines = json.load(f)
+            print(f"Pines encontrados en JSON: {len(pines)}")
+            return jsonify(pines)
+        except Exception as e2:
+            print(f"Error también en archivo JSON: {str(e2)}")
+            return jsonify({"error": f"Error en base de datos: {str(e)}. Error en JSON: {str(e2)}"}), 500
 
 
 # Ruta para agregar un nuevo pin o actualizar todos los pines
@@ -95,28 +200,76 @@ def obtener_pines():
 def manejar_pines():
     try:
         datos = request.json or {}
+        print(f"Datos recibidos para crear pin: {datos}")
+        
+        # Importar conexión a la base de datos
+        from models import conn
+        cursor = conn.cursor()
         
         # Si recibimos una lista, actualizamos todos los pines
         if isinstance(datos, list):
-            print(f"Actualizando {len(datos)} pines...")
-            with open(PINES_FILE, 'w') as f:
-                json.dump(datos, f, indent=2, ensure_ascii=False)
-            return jsonify({"mensaje": f"Se actualizaron {len(datos)} pines exitosamente"}), 200
+            print(f"Insertando {len(datos)} pines en PostgreSQL...")
+            for pin_data in datos:
+                cursor.execute('''
+                    INSERT INTO pines (nombre, tipo, descripcion, latitud, longitud, x, y, activo)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                ''', (
+                    pin_data.get('nombre', ''),
+                    pin_data.get('tipo', 'rio'),
+                    pin_data.get('descripcion', ''),
+                    pin_data.get('latitud'),
+                    pin_data.get('longitud'),
+                    pin_data.get('x'),
+                    pin_data.get('y'),
+                    pin_data.get('activo', True)
+                ))
+            conn.commit()
+            return jsonify({"mensaje": f"Se insertaron {len(datos)} pines exitosamente"}), 200
         
         # Si recibimos un objeto, agregamos un nuevo pin
         else:
-            with open(PINES_FILE, 'r') as f:
-                pines = json.load(f)
-            nuevo_id = max([p.get('id', 0) for p in pines], default=0) + 1
+            cursor.execute('''
+                INSERT INTO pines (nombre, tipo, descripcion, latitud, longitud, x, y, activo)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                RETURNING id
+            ''', (
+                datos.get('nombre', 'Nuevo Pin'),
+                datos.get('tipo', 'rio'),
+                datos.get('descripcion', ''),
+                datos.get('latitud'),
+                datos.get('longitud'),
+                datos.get('x'),
+                datos.get('y'),
+                datos.get('activo', True)
+            ))
+            nuevo_id = cursor.fetchone()[0]
+            conn.commit()
+            
             datos['id'] = nuevo_id
-            pines.append(datos)
-            with open(PINES_FILE, 'w') as f:
-                json.dump(pines, f, indent=2, ensure_ascii=False)
+            print(f"Pin creado exitosamente con ID: {nuevo_id}")
             return jsonify(datos), 201
             
     except Exception as e:
-        print(f"Error al manejar pines: {str(e)}")
-        return jsonify({"error": str(e)}), 500
+        print(f"Error al crear pin en PostgreSQL: {str(e)}")
+        # Fallback a archivo JSON
+        try:
+            print("Intentando fallback a archivo JSON...")
+            if isinstance(datos, list):
+                with open(PINES_FILE, 'w') as f:
+                    json.dump(datos, f, indent=2, ensure_ascii=False)
+                return jsonify({"mensaje": f"Se actualizaron {len(datos)} pines exitosamente (JSON)"}), 200
+            else:
+                with open(PINES_FILE, 'r') as f:
+                    pines = json.load(f)
+                nuevo_id = max([p.get('id', 0) for p in pines], default=0) + 1
+                datos['id'] = nuevo_id
+                pines.append(datos)
+                with open(PINES_FILE, 'w') as f:
+                    json.dump(pines, f, indent=2, ensure_ascii=False)
+                return jsonify(datos), 201
+        except Exception as e2:
+            print(f"Error también en archivo JSON: {str(e2)}")
+            return jsonify({"error": f"Error en base de datos: {str(e)}. Error en JSON: {str(e2)}"}), 500
 
 
 # Ruta para actualizar un pin por id
@@ -181,6 +334,8 @@ def datos_ecosistema():
         "turbidez": 5.3
     }
     return jsonify(datos)
+
+app.register_blueprint(imagenes_bp)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
