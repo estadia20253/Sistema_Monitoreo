@@ -7,12 +7,9 @@ import psycopg2
 from dotenv import load_dotenv
 
 app = Flask(__name__)
-CORS(app)  # Permitir solicitudes desde el frontend
+CORS(app)
 
-# Cargar variables de entorno desde el archivo .env
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', 'frontend', '.env'))
-
-# Inicializar modelos y base de datos
 try:
     from models import conn
     print("✅ Conexión a PostgreSQL establecida correctamente")
@@ -160,7 +157,7 @@ def obtener_pines():
         from models import conn
         cursor = conn.cursor()
         
-        cursor.execute("SELECT id, nombre, tipo, descripcion, latitud, longitud, x, y, activo FROM pines WHERE activo = TRUE")
+        cursor.execute("SELECT id, nombre, tipo, descripcion, latitud, longitud, activo FROM pines WHERE activo = TRUE")
         resultados = cursor.fetchall()
         
         pines = []
@@ -172,9 +169,7 @@ def obtener_pines():
                 'descripcion': row[3],
                 'latitud': row[4],
                 'longitud': row[5],
-                'x': row[6],
-                'y': row[7],
-                'activo': row[8]
+                'activo': row[6]
             }
             pines.append(pin)
         

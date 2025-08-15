@@ -10,7 +10,7 @@ body {
     color: #222;
     margin: 0;
     padding: 0;
-    padding-top: 80px; /* Espacio para el navbar fijo */
+    padding-top: 80px;
 }
 
 .container {
@@ -19,15 +19,14 @@ body {
     padding: 0 20px;
 }
 
-/* Header y Navegación */
 .navbar {
     background: linear-gradient(135deg, #2c3e50, #34495e);
     color: white;
     padding: 1rem 0;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    position: fixed; /* Hace el navbar fijo */
-    top: 0; /* Lo posiciona en la parte superior */
-    left: 0; /* Lo posiciona en la izquierda */
+    position: fixed;
+    top: 0;
+    left: 0;
     right: 0; /* Lo posiciona en la derecha */
     width: 100%; /* Ocupa todo el ancho */
     z-index: 1000; /* Asegura que esté por encima de otros elementos */
@@ -1599,5 +1598,192 @@ body {
     .form-section {
         margin-bottom: 2rem;
         padding-bottom: 1rem;
+    }
+}
+
+/* ==================== ESTILOS PARA SISTEMA DE IMÁGENES ==================== */
+
+/* Panel de imágenes para administrador */
+.admin-imagenes-panel {
+    margin-top: 20px;
+    padding: 15px;
+    border: 2px solid #3498db;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+    transition: all 0.3s ease;
+}
+
+.admin-imagenes-panel:hover {
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+}
+
+.admin-imagenes-panel h4 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* Formulario de subida de imágenes */
+#form-subir-imagen {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#form-subir-imagen input[type="file"] {
+    padding: 8px;
+    border: 1px solid #bdc3c7;
+    border-radius: 4px;
+    background-color: white;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+#form-subir-imagen input[type="file"]:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+#form-subir-imagen button {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#form-subir-imagen button:hover {
+    background: linear-gradient(135deg, #2980b9, #21618c);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+}
+
+#form-subir-imagen button:active {
+    transform: translateY(0);
+}
+
+/* Panel de imágenes para usuario regular */
+.user-imagenes-panel {
+    margin-top: 20px;
+    padding: 15px;
+    border: 2px solid #27ae60;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+}
+
+.user-imagenes-panel h4 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* Contenedores de imágenes */
+#imagenes-analisis,
+#imagenes-usuario {
+    max-height: 400px;
+    overflow-y: auto;
+    border-radius: 6px;
+}
+
+/* Estilos para cada imagen mostrada */
+.imagen-item {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: white;
+    transition: all 0.3s ease;
+}
+
+.imagen-item:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+}
+
+.imagen-item img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.imagen-info {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #555;
+}
+
+.imagen-info div {
+    margin-bottom: 4px;
+}
+
+.imagen-info strong {
+    color: #2c3e50;
+}
+
+/* Análisis temporal para administradores */
+.analisis-temporal {
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.analisis-temporal.aumento {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+
+.analisis-temporal.disminucion {
+    background-color: #f8d7da;
+    border: 1px solid #f1aeb5;
+    color: #721c24;
+}
+
+/* Loading states */
+.imagen-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    color: #666;
+    font-style: italic;
+}
+
+.imagen-error {
+    color: #e74c3c;
+    padding: 10px;
+    text-align: center;
+    font-style: italic;
+    background-color: #fdf2f2;
+    border: 1px solid #f8d7da;
+    border-radius: 4px;
+}
+
+/* Responsive para paneles de imágenes */
+@media (max-width: 768px) {
+    .admin-imagenes-panel,
+    .user-imagenes-panel {
+        margin-top: 15px;
+        padding: 12px;
+    }
+    
+    .admin-imagenes-panel h4,
+    .user-imagenes-panel h4 {
+        font-size: 14px;
+    }
+    
+    #imagenes-analisis,
+    #imagenes-usuario {
+        max-height: 300px;
     }
 }

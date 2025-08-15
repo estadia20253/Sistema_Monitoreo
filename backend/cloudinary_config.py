@@ -3,7 +3,6 @@ import cloudinary.uploader
 import cloudinary.api
 import os
 
-# Configuración de Cloudinary
 cloudinary.config(
     cloud_name = "decigylbc",
     api_key = "635337671942931",

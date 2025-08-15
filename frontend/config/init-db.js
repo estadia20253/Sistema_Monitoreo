@@ -2,7 +2,6 @@ const { query, testConnection } = require('../config/database');
 const fs = require('fs');
 const path = require('path');
 
-// SQL para crear la tabla de usuarios
 const CREATE_USERS_TABLE = `
     CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,

@@ -7,6 +7,8 @@ const axios = require('axios');
 const cors = require('cors');
 const session = require('express-session');
 const bcrypt = require('bcryptjs');
+const multer = require('multer');
+const fs = require('fs');
 
 // Importar configuración de base de datos y modelos
 const { testConnection } = require('./config/database');
@@ -19,6 +21,23 @@ const PORT = process.env.PORT || 3000;
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';
 const ADMIN_USER = process.env.ADMIN_USER || 'admin';
 const ADMIN_PASS = process.env.ADMIN_PASS || 'admin123';
+
+// Configuración de multer para manejo de archivos
+const storage = multer.memoryStorage(); // Almacenar en memoria para reenviar al backend
+const upload = multer({ 
+    storage: storage,
+    limits: {
+        fileSize: 10 * 1024 * 1024, // 10MB máximo
+    },
+    fileFilter: (req, file, cb) => {
+        // Aceptar solo imágenes
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Solo se permiten archivos de imagen'), false);
+        }
+    }
+});
 
 // Configuración de middleware
 app.use(cors());
@@ -899,10 +918,158 @@ app.delete('/api/pines/:id', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Error al eliminar pin:', error.message);
-        res.status(500).json({ error: 'Error al eliminar pin' });
+        console.error('Error al eliminar pin:', error);
+        res.status(500).json({ error: 'Error al eliminar pin: ' + error.message });
     }
 });
+
+// ==================== FIN RUTAS PARA IMÁGENES ====================
+
+// Funciones de validación para el servidor
+
+// Ruta para obtener imágenes de un pin específico
+app.get('/api/imagenes/:pinId', async (req, res) => {
+    // Verificar autenticación
+    if (!req.session.user) {
+        return res.status(401).json({ error: 'Debes iniciar sesión para ver imágenes' });
+    }
+
+    try {
+        const pinId = parseInt(req.params.pinId);
+        
+        console.log(`📷 Solicitando imágenes para pin ID: ${pinId}`);
+        
+        // Obtener imágenes del backend
+        const response = await axios.get(`${BACKEND_URL}/api/imagenes/${pinId}`, {
+            timeout: 10000
+        });
+
+        console.log(`✅ Se encontraron ${response.data.length} imágenes para el pin ${pinId}`);
+        res.json(response.data);
+
+    } catch (error) {
+        console.error('❌ Error al obtener imágenes:', error.message);
+        
+        if (error.response?.status === 404) {
+            res.json([]); // Retornar array vacío si no hay imágenes
+        } else if (error.code === 'ECONNREFUSED') {
+            res.status(503).json({
+                error: 'Backend no disponible',
+                message: 'No se pudo conectar al servidor backend'
+            });
+        } else {
+            res.status(500).json({
+                error: 'Error al obtener imágenes',
+                message: error.message
+            });
+        }
+    }
+});
+
+// Ruta para subir imágenes
+app.post('/api/imagenes', upload.single('imagen'), async (req, res) => {
+        if (!req.session.user || req.session.user.role !== 'admin') {
+        return res.status(403).json({ error: 'Solo los administradores pueden subir imágenes' });
+    }
+
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No se proporcionó ningún archivo' });
+        }
+
+        const pinId = req.body.pin_id;
+        if (!pinId) {
+            return res.status(400).json({ error: 'ID del pin es requerido' });
+        }
+        
+        // Crear FormData para enviar al backend
+        const FormData = require('form-data');
+        const formData = new FormData();
+        
+        // Agregar el archivo
+        formData.append('imagen', req.file.buffer, {
+            filename: req.file.originalname,
+            contentType: req.file.mimetype
+        });
+        
+        // Agregar el pin_id
+        formData.append('pin_id', pinId);
+
+        const response = await axios.post(`${BACKEND_URL}/api/imagenes`, formData, {
+            headers: {
+                ...formData.getHeaders(),
+                'Accept': 'application/json'
+            },
+            timeout: 30000
+        });
+
+        console.log('✅ Imagen subida correctamente:', response.data);
+        res.json(response.data);
+
+    } catch (error) {
+        console.error('❌ Error al subir imagen:', error.message);
+        
+        if (error.response?.status === 400) {
+            res.status(400).json({
+                error: 'Datos inválidos',
+                message: error.response.data?.error || error.message
+            });
+        } else if (error.code === 'ECONNREFUSED') {
+            res.status(503).json({
+                error: 'Backend no disponible',
+                message: 'No se pudo conectar al servidor backend'
+            });
+        } else {
+            res.status(500).json({
+                error: 'Error al subir imagen',
+                message: error.message
+            });
+        }
+    }
+});
+
+app.delete('/api/imagenes/:imagenId', async (req, res) => {
+    if (!req.session.user || req.session.user.role !== 'admin') {
+        return res.status(403).json({ error: 'Solo los administradores pueden eliminar imágenes' });
+    }
+
+    try {
+        const imagenId = parseInt(req.params.imagenId);
+        console.log(`🗑️ Solicitando eliminación de imagen ID: ${imagenId}`);
+        
+        const response = await axios.delete(`${BACKEND_URL}/api/imagenes/${imagenId}`, {
+            timeout: 10000,
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        console.log(`✅ Imagen ${imagenId} eliminada correctamente:`, response.data);
+        res.json(response.data);
+
+    } catch (error) {
+        console.error('❌ Error al eliminar imagen:', error.message);
+        
+        if (error.response?.status === 404) {
+            res.status(404).json({
+                error: 'Imagen no encontrada',
+                message: 'La imagen especificada no existe'
+            });
+        } else if (error.code === 'ECONNREFUSED') {
+            res.status(503).json({
+                error: 'Backend no disponible',
+                message: 'No se pudo conectar al servidor backend'
+            });
+        } else {
+            res.status(500).json({
+                error: 'Error al eliminar imagen',
+                message: error.message
+            });
+        }
+    }
+});
+
+// ==================== FIN RUTAS PARA IMÁGENES ====================
 
 // Funciones de validación para el servidor
 function validateEmail(email) {

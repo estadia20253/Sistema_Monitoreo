@@ -199,7 +199,6 @@ class User {
         }
     }
 
-    // Contar usuarios activos
     static async countActiveUsers() {
         try {
             const result = await query(

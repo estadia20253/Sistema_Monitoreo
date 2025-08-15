@@ -1,11 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Navegación suave
     initSmoothNavigation();
-    
-    // Verificar estado del backend
     verificarBackend();
-    
-    // Manejo de enlaces activos
     actualizarNavegacionActiva();
 });
 

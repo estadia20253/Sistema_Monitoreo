@@ -211,7 +211,6 @@ class Pin {
         }
     }
 
-    // Obtener pines por usuario
     static async findByUserId(userId) {
         const sql = `
             SELECT * FROM pines 
