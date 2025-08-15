@@ -3,7 +3,7 @@
 
 Sistema web para monitorear ecosistemas acuáticos en Hidalgo, permitiendo visualizar y gestionar información sobre ríos, lagos y presas.
 
-## 🔧 Requisitos
+## Requisitos
 
 - Node.js
 - Python 3.x

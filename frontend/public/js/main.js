@@ -21,7 +21,7 @@ function initSmoothNavigation() {
 
 async function verificarBackend() {
     try {
-        const response = await fetch('/api/mapa');
+        const response = await fetch('/api/datos-ecosistema');
         if (response.ok) {
             console.log('✅ Backend conectado correctamente');
         } else {

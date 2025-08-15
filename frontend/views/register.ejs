@@ -5,15 +5,25 @@
     <% } %>
     <form method="POST" action="/register" class="auth-form extended-form">
         <div class="form-section">
-            <h3>� Información de Acceso</h3>
+            <h3> Información de Acceso</h3>
             <label>📧 Email:
                 <input type="email" name="email" required placeholder="tu.email@ejemplo.com"
                        title="Ingresa un email válido">
             </label>
-            <label>� Contraseña:
-                <input type="password" name="password" required placeholder="Mínimo 6 caracteres" 
-                       minlength="6" title="La contraseña debe tener al menos 6 caracteres">
+            <label>🔒 Contraseña:
+                <input type="password" name="password" required 
+                       placeholder="Mínimo 8 caracteres y 1 caracter especial" 
+                       pattern="^(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$"
+                       minlength="8" 
+                       title="La contraseña debe tener al menos 8 caracteres y un caracter especial (!@#$%^&*)">
             </label>
+            <div class="password-requirements">
+                <small>La contraseña debe contener:</small>
+                <ul>
+                    <li>Mínimo 8 caracteres</li>
+                    <li>Al menos un caracter especial (!@#$%^&*)</li>
+                </ul>
+            </div>
         </div>
 
         <div class="form-section">
@@ -24,12 +34,12 @@
                        title="Solo se permiten letras y espacios">
             </label>
             <div class="form-row">
-                <label>� Apellido Paterno:
+                <label> Apellido Paterno:
                     <input type="text" name="apellidoPaterno" required placeholder="Ej: González" 
                            maxlength="50" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+"
                            title="Solo se permiten letras y espacios">
                 </label>
-                <label>� Apellido Materno:
+                <label> Apellido Materno:
                     <input type="text" name="apellidoMaterno" required placeholder="Ej: López" 
                            maxlength="50" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+"
                            title="Solo se permiten letras y espacios">
@@ -38,7 +48,7 @@
         </div>
 
         <div class="form-section">
-            <h3>� Seguridad - Recuperación de Contraseña</h3>
+            <h3> Seguridad - Recuperación de Contraseña</h3>
             <label>❓ Pregunta Secreta:
                 <select name="preguntaSecreta" required>
                     <option value="">Selecciona una pregunta secreta</option>
@@ -54,7 +64,7 @@
                     <option value="¿Cuál es tu película favorita?">🎬 ¿Cuál es tu película favorita?</option>
                 </select>
             </label>
-            <label>� Respuesta Secreta:
+            <label> Respuesta Secreta:
                 <input type="text" name="respuestaSecreta" required placeholder="Tu respuesta a la pregunta secreta" 
                        maxlength="100" title="Esta respuesta te ayudará a recuperar tu contraseña">
             </label>

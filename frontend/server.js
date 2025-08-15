@@ -191,8 +191,22 @@ app.post('/login', async (req, res) => {
 
         // Buscar usuario por email en PostgreSQL
         const user = await User.findByEmail(email);
+        console.log('👤 Usuario encontrado:', user ? 'Sí' : 'No');
+        
+        if (!user) {
+            return res.render('layout', {
+                title: 'Iniciar Sesión',
+                pageTitle: 'Login',
+                error: 'Email o contraseña incorrectos',
+                user: null,
+                pageView: 'login'
+            });
+        }
 
-        if (user && await user.validatePassword(password)) {
+        const isValidPassword = await user.validatePassword(password);
+        console.log('🔑 Contraseña válida:', isValidPassword ? 'Sí' : 'No');
+
+        if (isValidPassword) {
             // Verificar si la cuenta está activa
             if (!user.isActive) {
                 return res.render('layout', {
@@ -626,53 +640,7 @@ app.get('/api/datos-ecosistema', async (req, res) => {
     }
 });
 
-// API para obtener el mapa (requiere autenticación)
-app.get('/api/mapa', async (req, res) => {
-    // Verificar que el usuario esté autenticado
-    if (!req.session.user) {
-        return res.status(401).json({ 
-            error: 'No autorizado',
-            message: 'Debes iniciar sesión para acceder al mapa'
-        });
-    }
-    
-    try {
-        console.log(`Intentando conectar al backend: ${BACKEND_URL}/api/mapa`);
-        const response = await axios.get(`${BACKEND_URL}/api/mapa`, {
-            responseType: 'stream',
-            timeout: 10000,
-            headers: {
-                'Accept': 'image/png, image/jpeg, image/gif, */*'
-            }
-        });
-        
-        // Establecer headers correctos para la imagen
-        res.setHeader('Content-Type', 'image/png');
-        response.data.pipe(res);
-    } catch (error) {
-        console.error('Error detallado:', error.response?.status, error.response?.statusText);
-        console.error('Error al obtener el mapa:', error.message);
-        
-        if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
-            res.status(503).json({ 
-                error: 'Backend no disponible',
-                message: 'No se pudo conectar al servidor backend. Verifica que esté ejecutándose en el puerto 5000.',
-                debug: `Intentando conectar a: ${BACKEND_URL}/api/mapa`
-            });
-        } else if (error.response?.status === 404) {
-            res.status(404).json({ 
-                error: 'Imagen no encontrada',
-                message: 'La imagen del mapa no se encontró en el backend.'
-            });
-        } else {
-            res.status(500).json({ 
-                error: 'Error al cargar el mapa',
-                message: error.message,
-                debug: `Error code: ${error.code}`
-            });
-        }
-    }
-});
+
 
 // API para obtener pines (desde base de datos + backend para coordenadas)
 app.get('/api/pines', async (req, res) => {
@@ -1078,7 +1046,11 @@ function validateEmail(email) {
 }
 
 function validatePassword(password) {
-    return password && password.length >= 6 && password.length <= 100;
+    const specialChars = /[!@#$%^&*]/;
+    // Validar longitud y que la contraseña exista, los caracteres especiales son opcionales
+    return password && 
+           password.length >= 8 && 
+           password.length <= 100;
 }
 
 function validateName(name) {

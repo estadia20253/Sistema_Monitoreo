@@ -121,7 +121,12 @@ class User {
     // Validar contraseña
     async validatePassword(password) {
         try {
-            return await bcrypt.compare(password, this.password);
+            console.log('🔐 Validando contraseña');
+            console.log('📝 Contraseña ingresada:', password);
+            console.log('💾 Contraseña almacenada (hash):', this.password);
+            const isValid = await bcrypt.compare(password, this.password);
+            console.log('✅ Resultado de la validación:', isValid);
+            return isValid;
         } catch (error) {
             console.error('Error validando contraseña:', error);
             throw error;

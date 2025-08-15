@@ -1259,6 +1259,7 @@ body {
 }
 
 .auth-form input[type="text"],
+.auth-form input[type="email"],
 .auth-form input[type="password"] {
     width: 100%;
     padding: 1rem 1.2rem;
@@ -1271,7 +1272,27 @@ body {
     box-sizing: border-box;
 }
 
+.password-requirements {
+    margin-top: 0.5rem;
+    padding: 0.8rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.password-requirements ul {
+    margin: 0.5rem 0 0 1.2rem;
+    padding: 0;
+}
+
+.password-requirements li {
+    margin: 0.3rem 0;
+    font-size: 0.85rem;
+}
+
 .auth-form input[type="text"]:focus,
+.auth-form input[type="email"]:focus,
 .auth-form input[type="password"]:focus {
     outline: none;
     border-color: #1976d2;

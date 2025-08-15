@@ -129,23 +129,7 @@ def home():
         "estado": "activo"
     })
 
-# Endpoint para servir el mapa
-@app.route('/api/mapa')
-def obtener_mapa():
-    try:
-        # Servir la imagen PNG del mapa
-        ruta_imagen = os.path.join(os.path.dirname(__file__), 'static', 'Mapa.webp')
-        print(f"Buscando imagen en: {ruta_imagen}")
-        
-        if os.path.exists(ruta_imagen):
-            print("Enviando imagen...")
-            return send_file(ruta_imagen, mimetype='image/webp')
-        else:
-            print("Imagen no encontrada")
-            return jsonify({"error": "Imagen del mapa no encontrada"}), 404
-    except Exception as e:
-        print(f"Error: {str(e)}")
-        return jsonify({"error": str(e)}), 500
+
 
 # Endpoint para obtener todos los pines
 @app.route('/api/pines', methods=['GET'])
