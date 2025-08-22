@@ -4,17 +4,17 @@ DOCUMENTACIÓN TÉCNICA - SISTEMA DE MONITOREO WEB
 
 El Sistema de Monitoreo Web es una aplicación web de dos niveles (frontend y backend) diseñada para el monitoreo de ecosistemas acuáticos del estado de Hidalgo. El sistema permite:
 
-- A los usuarios normales:
-  * Visualizar puntos de monitoreo en un mapa interactivo
-  * Ver detalles e imágenes de los puntos de monitoreo existentes
-  * Acceder mediante autenticación segura
-  * Recuperar su contraseña mediante preguntas secretas
+A los usuarios normales:
+  Visualizar puntos de monitoreo en un mapa interactivo
+  Ver detalles e imágenes de los puntos de monitoreo existentes
+  Acceder mediante autenticación segura
+  Recuperar su contraseña mediante preguntas secretas
 
-- A los administradores:
-  * Todas las funciones de usuarios normales
-  * Crear nuevos puntos de monitoreo en el mapa
-  * Subir y gestionar imágenes (máximo 10MB por imagen)
-  * Eliminar puntos de monitoreo existentes
+A los administradores:
+  Todas las funciones de usuarios normales
+  Crear nuevos puntos de monitoreo en el mapa
+  Subir y gestionar imágenes (máximo 10MB por imagen)
+  Eliminar puntos de monitoreo existentes
 
 2. ARQUITECTURA DEL SISTEMA
 
@@ -61,35 +61,35 @@ Sistema_de_Monitoreo_web/
 2.2 Stack Tecnológico
 
 Frontend (Node.js):
-- Express.js (v4) como framework web principal
-- EJS para renderizado de vistas
-- PostgreSQL para almacenamiento de usuarios y pines
-- Bcrypt.js para hash de contraseñas
-- Express-session para manejo de sesiones de usuario
-- Multer para manejo de subida de imágenes (límite 10MB)
-- Axios para comunicación con el backend
-- CORS habilitado para comunicación segura
+  Express.js (v4) como framework web principal
+  EJS para renderizado de vistas
+  PostgreSQL para almacenamiento de usuarios y pines
+  Bcrypt.js para hash de contraseñas
+  Express-session para manejo de sesiones de usuario
+  Multer para manejo de subida de imágenes (límite 10MB)
+  Axios para comunicación con el backend
+  CORS habilitado para comunicación segura
 
 Backend (Python):
-- Flask como servidor web ligero
-- Flask-CORS para manejo de CORS
-- PostgreSQL para persistencia de datos
-- Sistema de archivos para almacenamiento temporal
-- Migración automática de datos JSON a PostgreSQL
+  Flask como servidor web ligero
+  Flask-CORS para manejo de CORS
+  PostgreSQL para persistencia de datos
+  Sistema de archivos para almacenamiento temporal
+  Migración automática de datos JSON a PostgreSQL
 
 Características de Seguridad:
-- Hash de contraseñas con bcrypt
-- Sesiones seguras con secreto configurable
-- Validación de datos en ambos lados
-- Límite de intentos de recuperación de contraseña
-- Control de acceso basado en roles (user/admin)
+  Hash de contraseñas con bcrypt
+  Sesiones seguras con secreto configurable
+  Validación de datos en ambos lados
+  Límite de intentos de recuperación de contraseña
+  Control de acceso basado en roles (user/admin)
 
 Base de Datos:
-- PostgreSQL como base de datos principal
-- Tablas:
-  * users: almacena usuarios y credenciales
-  * pins: almacena puntos de monitoreo
-- Respaldo en JSON para recuperación
+  PostgreSQL como base de datos principal
+  Tablas:
+  users: almacena usuarios y credenciales
+  pins: almacena puntos de monitoreo
+  Respaldo en JSON para recuperación
 
 2.3 Base de Datos
 
