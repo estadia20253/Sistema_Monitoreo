@@ -27,9 +27,9 @@ body {
     position: fixed;
     top: 0;
     left: 0;
-    right: 0; /* Lo posiciona en la derecha */
-    width: 100%; /* Ocupa todo el ancho */
-    z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    right: 0; 
+    width: 100%; 
+    z-index: 1000; 
 }
 
 .nav-container {
@@ -76,11 +76,11 @@ body {
     border-radius: 25px !important;
 }
 
-/* Sección Hero */
+
 .hero {
     background: linear-gradient(120deg, #1976d2 60%, #4fc3f7 100%);
     color: white;
-    padding: 2rem 0; /* Reducido el padding superior */
+    padding: 2rem 0; 
     text-align: center;
     border-bottom-left-radius: 40px;
     border-bottom-right-radius: 40px;
@@ -123,7 +123,6 @@ body {
 }
 
 
-/* Información adicional - similar a mapa */
 .info-card {
     background: #e3f2fd;
     border-radius: 14px;
@@ -159,7 +158,6 @@ body {
     font-size: 1rem;
 }
 
-/* Sección de Privacidad */
 .privacy-section {
     background: #e3f2fd;
     padding: 3rem 0 2rem 0;
@@ -208,7 +206,6 @@ body {
     margin-bottom: 0.5rem;
 }
 
-/* Enhanced Privacy and Policy Styles */
 .policy-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -320,21 +317,18 @@ body {
     font-weight: 600;
 }
 
-/* Sección del Mapa */
 .map-section {
     padding: 2rem 0;
     background: #f8f9fa;
     min-height: calc(100vh - 80px);
 }
 
-/* Contenedor principal del mapa */
 .container-fluid {
     max-width: 100%;
     margin: 0 auto;
     padding: 0 20px;
 }
 
-/* Header del mapa */
 .map-header {
     display: flex;
     justify-content: space-between;
@@ -408,7 +402,6 @@ body {
     background: linear-gradient(135deg, #229954, #1e8449);
 }
 
-/* Botones para agregar pines */
 .btn-agregar {
     background: linear-gradient(135deg, #3498db, #2980b9);
     color: white;
@@ -457,10 +450,9 @@ body {
     overflow: hidden;
     border-radius: 10px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    margin-top: 1rem; /* Espacio adicional para el navbar fijo */
+    margin-top: 1rem; 
 }
 
-/* Sección del Mapa */
 .map-container {
     flex: 1;
     position: relative;
@@ -470,8 +462,8 @@ body {
     min-height: 600px;
     overflow: visible;
     display: flex;
-    justify-content: center; /* Centra horizontalmente el contenido */
-    align-items: center;     /* Centra verticalmente el contenido */
+    justify-content: center; 
+    align-items: center;     
     transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), flex 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -480,7 +472,6 @@ body {
     flex: 0.65;
 }
 
-/* Wrapper para que el mapa y los pines se muevan juntos */
 .map-wrapper {
     position: relative;
     display: inline-block;
@@ -488,7 +479,6 @@ body {
     max-height: 100%;
 }
 
-/* Centrar la imagen del mapa */
 .map-image {
     display: block;
     margin-left: auto;
@@ -505,7 +495,6 @@ body {
     z-index: 1;
 }
 
-/* Google Maps Container */
 .google-map {
     width: 100%;
     height: 100%;
@@ -514,7 +503,6 @@ body {
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
-/* Pines en el mapa */
 .pines-container {
     position: absolute;
     top: 0;
@@ -535,7 +523,6 @@ body {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Estilos para los iconos de los pines */
 .pin-icon {
     width: 45px;
     height: 45px;
@@ -577,7 +564,7 @@ body {
         inset 0 1px 0 rgba(255,255,255,0.4);
 }
 
-/* Iconos específicos por tipo */
+
 .pin-icon.rio {
     background: linear-gradient(135deg, #2196f3, #1976d2);
     border-color: #bbdefb;
@@ -605,7 +592,6 @@ body {
         inset 0 1px 0 rgba(255,255,255,0.3);
 }
 
-/* Efecto de pulso para pines activos */
 .pin-icon.activo {
     animation: pulso 2s infinite;
 }
@@ -622,7 +608,6 @@ body {
     }
 }
 
-/* Tooltip mejorado para los pines */
 .pin-tooltip {
     position: absolute;
     bottom: 125%;
@@ -659,7 +644,6 @@ body {
     transform: translateX(-50%) translateY(-5px);
 }
 
-/* Panel de detalles */
 .detalles-container {
     width: 0;
     background: white;
@@ -771,7 +755,6 @@ body {
     justify-content: center;
 }
 
-/* Nuevos estilos para Node.js */
 .hidden {
     display: none !important;
 }
@@ -843,7 +826,6 @@ body {
     transform: translateY(-2px);
 }
 
-/* Nuevos estilos para el mapa */
 .mapa-container {
     position: relative;
     width: 100%;
@@ -864,7 +846,6 @@ body {
     transform: translateX(-10%);
 }
 
-/* Estilos para los pines del mapa */
 .punto-interes {
     position: absolute;
     cursor: pointer;
@@ -911,7 +892,6 @@ body {
     border-top-color: rgba(44, 62, 80, 0.9);
 }
 
-/* Animaciones para el mapa y pines */
 @keyframes slideIn {
     from {
         opacity: 0;
@@ -932,7 +912,6 @@ body {
     }
 }
 
-/* Aplicar animaciones */
 .mapa-container {
     animation: fadeIn 0.5s ease;
 }
@@ -945,7 +924,6 @@ body {
     animation: slideIn 0.5s ease forwards;
 }
 
-/* Responsive Design para el Mapa */
 @media (max-width: 768px) {
     .map-header {
         flex-direction: column;
@@ -1094,7 +1072,6 @@ body {
     }
 }
 
-/* Estilos para página de error */
 .error-section {
     padding: 6rem 0;
     text-align: center;
@@ -1120,7 +1097,6 @@ body {
     margin-bottom: 2rem;
 }
 
-/* Página principal - estilos generales */
 .header-principal {
     background: linear-gradient(90deg, #3498db 60%, #2ecc71 100%);
     color: white;
@@ -1220,9 +1196,9 @@ body {
     font-size: 1rem;
 }
 
-/* Authentication Forms Styles */
+
 .auth-container {
-    min-height: calc(100vh - 280px); /* Ajustado para el navbar fijo */
+    min-height: calc(100vh - 280px); 
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1339,7 +1315,6 @@ body {
     box-shadow: 0 4px 12px rgba(198, 40, 40, 0.1);
 }
 
-/* Auth page navigation styles */
 .auth-nav-link {
     display: inline-block;
     margin-top: 1.5rem;
@@ -1361,7 +1336,6 @@ body {
     text-decoration: underline;
 }
 
-/* Extended Registration Form Styles */
 .extended-form {
     max-width: 600px;
     padding: 2.5rem;
@@ -1464,7 +1438,6 @@ body {
     background: linear-gradient(135deg, #1565c0 0%, #29b6f6 100%);
 }
 
-/* Progress indicator for form completion */
 .form-progress {
     background: #f8f9fa;
     padding: 1rem;
@@ -1490,7 +1463,6 @@ body {
     width: 0%;
 }
 
-/* Info note styles for important information */
 .info-note {
     background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
     border: 1px solid #ffcc02;
@@ -1509,8 +1481,6 @@ body {
 .info-note strong {
     color: #bf360c;
 }
-
-/* Styles for password recovery process */
 .secret-question-section {
     margin: 1.5rem 0;
 }
@@ -1555,7 +1525,6 @@ body {
     color: #2e7d32;
 }
 
-/* Enhanced info note for recovery process */
 .info-note {
     background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
     border: 1px solid #ffcc02;
@@ -1576,7 +1545,6 @@ body {
     color: #bf360c;
 }
 
-/* Additional auth form improvements for recovery */
 .auth-form input[type="password"] {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
@@ -1590,7 +1558,6 @@ body {
     box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
 }
 
-/* Responsive improvements for recovery forms */
 @media (max-width: 768px) {
     .question-display {
         font-size: 1rem;
@@ -1622,9 +1589,6 @@ body {
     }
 }
 
-/* ==================== ESTILOS PARA SISTEMA DE IMÁGENES ==================== */
-
-/* Panel de imágenes para administrador */
 .admin-imagenes-panel {
     margin-top: 20px;
     padding: 15px;
@@ -1645,7 +1609,6 @@ body {
     font-weight: 600;
 }
 
-/* Formulario de subida de imágenes */
 #form-subir-imagen {
     display: flex;
     flex-direction: column;
@@ -1689,7 +1652,6 @@ body {
     transform: translateY(0);
 }
 
-/* Panel de imágenes para usuario regular */
 .user-imagenes-panel {
     margin-top: 20px;
     padding: 15px;
@@ -1705,7 +1667,6 @@ body {
     font-weight: 600;
 }
 
-/* Contenedores de imágenes */
 #imagenes-analisis,
 #imagenes-usuario {
     max-height: 400px;
@@ -1713,7 +1674,6 @@ body {
     border-radius: 6px;
 }
 
-/* Estilos para cada imagen mostrada */
 .imagen-item {
     margin-bottom: 15px;
     padding: 10px;
@@ -1749,7 +1709,6 @@ body {
     color: #2c3e50;
 }
 
-/* Análisis temporal para administradores */
 .analisis-temporal {
     padding: 10px;
     border-radius: 5px;
@@ -1770,7 +1729,6 @@ body {
     color: #721c24;
 }
 
-/* Loading states */
 .imagen-loading {
     display: flex;
     justify-content: center;
@@ -1790,7 +1748,6 @@ body {
     border-radius: 4px;
 }
 
-/* Responsive para paneles de imágenes */
 @media (max-width: 768px) {
     .admin-imagenes-panel,
     .user-imagenes-panel {

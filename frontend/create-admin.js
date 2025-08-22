@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 /**
  * Script para crear el usuario administrador por defecto
  * Ejecutar con: node create-admin.js
@@ -36,7 +34,6 @@ async function createAdminUser() {
             role: 'admin'
         };
 
-        // Hash de la contraseña
         const hashedPassword = await bcrypt.hash(adminData.password, 12);
 
         // Insertar usuario administrador
@@ -56,9 +53,9 @@ async function createAdminUser() {
             adminData.preguntaSecreta,
             adminData.respuestaSecreta.toLowerCase(),
             adminData.role,
-            true, // is_active
-            0,    // password_reset_attempts
-            100   // profile_completeness
+            true, 
+            0,    
+            100   
         ]);
 
         const newAdmin = result.rows[0];

@@ -19,7 +19,6 @@
                 </button>
             </div>
             
-            <!-- Estadísticas -->
             <div class="control-group">
                 <h4>📊 Estadísticas</h4>
                 <div class="estadisticas-container">
@@ -44,8 +43,6 @@
         </div>
     </div>
     <% } %>
-
-    <!-- Panel de filtros (visible para ambos roles, pero en posiciones diferentes) -->
     <div class="<%= isAdmin ? 'admin-filters' : 'user-filters' %>">
         <h3>🔍 Filtros</h3>
         <div class="filtros-container">
@@ -63,7 +60,6 @@
             </label>
         </div>
         
-        <!-- Información básica (solo para usuarios) -->
         <% if (!isAdmin) { %>
         <div class="info-panel">
             <h4>ℹ️ Información</h4>
@@ -82,27 +78,22 @@
         <% } %>
     </div>
 
-    <!-- Contenedor del mapa de Google Maps -->
     <div id="google-map" class="google-map <%= isAdmin ? 'admin-map' : 'user-map' %>"></div>
     
-    <!-- Loading indicator -->
     <div id="loading" class="loading">
         <div class="loading-spinner"></div>
         <p>Cargando mapa de ecosistemas acuáticos...</p>
     </div>
 </div>
 
-<!-- Panel de detalles deslizable -->
 <div id="detalles-container" class="detalles-container <%= isAdmin ? 'admin-details' : 'user-details' %>">
     <div id="detalles-content" class="detalles-content">
-        <!-- El contenido se llenará dinámicamente -->
     </div>
 </div>
 
 <script src="/js/mapa_googlemaps.js"></script>
 
 <style>
-/* Estilos base del mapa */
 .mapa-container {
     position: relative;
     height: 100vh;
@@ -115,7 +106,6 @@
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
-/* Estilos específicos para la vista de administrador */
 .admin-view {
     display: grid;
     grid-template-columns: 300px 1fr;
@@ -217,7 +207,6 @@
     padding-bottom: 8px;
 }
 
-/* Estilos específicos para la vista de usuario */
 .user-view {
     position: relative;
 }
@@ -245,7 +234,6 @@
     padding-bottom: 8px;
 }
 
-/* Estilos comunes para filtros */
 .filtros-container {
     display: flex;
     flex-direction: column;
@@ -279,7 +267,6 @@
     transform: scale(1.1);
 }
 
-/* Estadísticas */
 .estadisticas-container {
     display: flex;
     flex-direction: column;
@@ -304,7 +291,6 @@
     font-weight: bold;
 }
 
-/* Info panel para usuarios */
 .info-panel {
     border-top: 1px solid #ecf0f1;
     padding-top: 15px;
@@ -356,7 +342,6 @@
     opacity: 0.9;
 }
 
-/* Panel de detalles */
 .detalles-container {
     background: #ffffff;
     border-left: 3px solid #3498db;
@@ -367,10 +352,9 @@
 }
 
 .user-details .detalle-acciones {
-    display: none; /* Ocultar botones de edición para usuarios */
+    display: none; 
 }
 
-/* Loading */
 .loading {
     position: absolute;
     top: 50%;
@@ -399,7 +383,6 @@
     100% { transform: rotate(360deg); }
 }
 
-/* Responsive */
 @media (max-width: 768px) {
     .admin-view {
         grid-template-columns: 1fr;
@@ -419,9 +402,6 @@
 }
 </style>
 
-<!-- Los paneles de imágenes ahora se muestran dentro del panel de detalles del pin -->
-
 <script>
-// La funcionalidad de imágenes ahora está integrada en mapa_googlemaps.js
-// dentro del panel de detalles de cada pin
+
 </script>

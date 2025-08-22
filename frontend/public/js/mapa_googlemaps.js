@@ -1005,7 +1005,6 @@ async function cargarImagenesAnalisis(pinId) {
                     
                     card.addEventListener('click', function(e) {
                         e.stopPropagation();
-                        // Ocultar todos los overlays primero
                         imageCards.forEach(otherCard => {
                             const otherOverlay = otherCard.querySelector('.imagen-overlay');
                             if (otherOverlay !== overlay) {
@@ -1013,7 +1012,6 @@ async function cargarImagenesAnalisis(pinId) {
                             }
                         });
                         
-                        // Toggle del overlay actual
                         if (overlay.style.display === 'flex') {
                             overlay.style.display = 'none';
                         } else {
@@ -1022,7 +1020,6 @@ async function cargarImagenesAnalisis(pinId) {
                     });
                 });
                 
-                // Cerrar overlays al hacer clic fuera
                 document.addEventListener('click', function() {
                     imageCards.forEach(card => {
                         const overlay = card.querySelector('.imagen-overlay');
@@ -1042,14 +1039,13 @@ async function cargarImagenesAnalisis(pinId) {
     }
 }
 
-// Función para cargar imágenes (usuario regular - solo lectura)
 async function cargarImagenesUsuario(pinId) {
     try {
-        console.log(`👤 Cargando imágenes de usuario para pin ID: ${pinId}`); // Debug log
+        console.log(`👤 Cargando imágenes de usuario para pin ID: ${pinId}`);
         const res = await fetch(`/api/imagenes/${pinId}`);
-        console.log(`👤 Respuesta del servidor:`, res.status); // Debug log
+        console.log(`👤 Respuesta del servidor:`, res.status);
         const imagenes = await res.json();
-        console.log(`👤 Imágenes de usuario encontradas:`, imagenes); // Debug log
+        console.log(`👤 Imágenes de usuario encontradas:`, imagenes); 
         const cont = document.getElementById('imagenes-usuario');
         
         if (cont) {
@@ -1077,15 +1073,13 @@ async function cargarImagenesUsuario(pinId) {
                         `).join('')}
                     </div>
                 `;
-                
-                // Agregar event listeners para mostrar/ocultar información detallada
+
                 const imageCards = cont.querySelectorAll('.imagen-card-user');
                 imageCards.forEach(card => {
                     const overlay = card.querySelector('.imagen-info-overlay');
                     
                     card.addEventListener('click', function(e) {
                         e.stopPropagation();
-                        // Ocultar todos los overlays primero
                         imageCards.forEach(otherCard => {
                             const otherOverlay = otherCard.querySelector('.imagen-info-overlay');
                             if (otherOverlay !== overlay) {
@@ -1093,7 +1087,6 @@ async function cargarImagenesUsuario(pinId) {
                             }
                         });
                         
-                        // Toggle del overlay actual
                         if (overlay.style.display === 'flex') {
                             overlay.style.display = 'none';
                         } else {
@@ -1102,7 +1095,6 @@ async function cargarImagenesUsuario(pinId) {
                     });
                 });
                 
-                // Cerrar overlays al hacer clic fuera
                 document.addEventListener('click', function() {
                     imageCards.forEach(card => {
                         const overlay = card.querySelector('.imagen-info-overlay');
@@ -1122,17 +1114,15 @@ async function cargarImagenesUsuario(pinId) {
     }
 }
 
-// Función para cerrar detalles
 function cerrarDetalles() {
     const mapContainer = document.getElementById('map-container');
     const detallesContainer = document.getElementById('detalles-container');
     
     if (mapContainer && detallesContainer) {
-        // Restaurar estado original
+       
         mapContainer.classList.remove('mapa-deslizado');
         detallesContainer.classList.remove('detalles-visible');
         
-        // Cerrar InfoWindow si está abierto
         if (infoWindow) {
             infoWindow.close();
         }
@@ -1141,14 +1131,11 @@ function cerrarDetalles() {
     }
 }
 
-// Función para eliminar imagen
 async function eliminarImagen(imagenId, pinId, event) {
-    // Detener la propagación del evento para evitar cerrar el overlay
     if (event) {
         event.stopPropagation();
     }
     
-    // Confirmación del usuario
     if (!confirm('¿Estás seguro de que quieres eliminar esta imagen?\n\nEsta acción no se puede deshacer.')) {
         return;
     }
@@ -1156,14 +1143,12 @@ async function eliminarImagen(imagenId, pinId, event) {
     try {
         console.log(`🗑️ Eliminando imagen ID: ${imagenId} del pin ID: ${pinId}`);
         
-        // Mostrar indicador de carga
         const imagenCard = document.querySelector(`[data-imagen-id="${imagenId}"]`);
         if (imagenCard) {
             imagenCard.style.opacity = '0.5';
             imagenCard.style.pointerEvents = 'none';
         }
         
-        // Realizar petición DELETE al servidor
         const response = await fetch(`/api/imagenes/${imagenId}`, {
             method: 'DELETE',
             headers: {
@@ -1179,10 +1164,8 @@ async function eliminarImagen(imagenId, pinId, event) {
         const data = await response.json();
         console.log('✅ Imagen eliminada del servidor:', data);
         
-        // Mostrar mensaje de éxito
         mostrarMensajeConfirmacion(`✅ Imagen eliminada correctamente`, 'agregar');
         
-        // Recargar las imágenes para actualizar la vista
         setTimeout(() => {
             cargarImagenesAnalisis(pinId);
         }, 500);
@@ -1190,21 +1173,15 @@ async function eliminarImagen(imagenId, pinId, event) {
     } catch (error) {
         console.error('❌ Error al eliminar imagen:', error);
         
-        // Restaurar estado visual en caso de error
         const imagenCard = document.querySelector(`[data-imagen-id="${imagenId}"]`);
         if (imagenCard) {
             imagenCard.style.opacity = '1';
             imagenCard.style.pointerEvents = 'auto';
         }
-        
-        // Mostrar mensaje de error
         mostrarMensajeConfirmacion(`❌ Error al eliminar imagen: ${error.message}`, 'error');
     }
 }
 
-// =================== FUNCIONES DE UTILIDAD GLOBAL ===================
-
-// Función global para diagnosticar filtros desde la consola
 window.debugFiltros = function() {
     console.log('🔧 === DEBUG DE FILTROS ===');
     diagnosticarFiltros();
@@ -1212,11 +1189,9 @@ window.debugFiltros = function() {
     console.log('🔧 === FIN DEBUG ===');
 };
 
-// Función global para forzar recarga de filtros
 window.recargarFiltros = function() {
     console.log('🔄 Recargando filtros...');
-    
-    // Desmarcar y marcar todos los filtros para forzar recarga
+
     const filtros = ['filtro-rios', 'filtro-lagos', 'filtro-presas'];
     
     filtros.forEach(filtroId => {
